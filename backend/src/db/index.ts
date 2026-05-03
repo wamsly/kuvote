@@ -1,0 +1,17 @@
+export {
+  db,
+  pool,
+  usersTable,
+  otpsTable,
+  schoolsTable,
+  departmentsTable,
+  coursesTable,
+  hostelsTable,
+  pollsTable,
+  pollSeatsTable,
+  candidatesTable,
+  endorsementsTable,
+  ballotTokensTable,
+  votesTable,
+  auditLogTable,
+} from "@workspace/db";
