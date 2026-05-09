@@ -10,6 +10,8 @@ export {
   pollsTable,
   pollSeatsTable,
   candidatesTable,
+  candidateDocumentsTable,
+  electionApplicationSettingsTable,
   endorsementsTable,
   ballotTokensTable,
   votesTable,

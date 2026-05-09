@@ -12,14 +12,19 @@ import {
 import { isEmailConfigured, sendOtpEmail } from "../lib/email";
 import { audit } from "../lib/audit";
 
+// Allowed registration number formats:
+// Format 1: J31/4338/2022  (1 capital letter, then digits/slash/digits/slash/year)
+// Format 2: J31S/4338/2022 (2 capital letters, then digits/slash/digits/slash/year)
+const REG_NUMBER_REGEX = /^[A-Z]{1,2}\d+\/\d+\/\d{4}$/;
 const EMAIL_REGEX = /^\d{1,6}\.{1,2}\d{4}@students\.ku\.ac\.ke$/;
 const OTP_TTL_MS = 10 * 60 * 1000;
 const REGISTRATION_VALID_MONTHS = 11;
 
-function extractRegistrationNumber(email: string): string | null {
-  const match = email.match(/^(\d{1,6})\.{1,2}(\d{4})@/);
+// Derive email from registration number: J31/4338/2022 -> 4338.2022@students.ku.ac.ke
+function suggestEmailFromRegNumber(regNo: string): string | null {
+  const match = regNo.match(/^[A-Z]{1,2}\d+\/(\d+)\/(\d{4})$/);
   if (!match) return null;
-  return `${match[1]}/${match[2]}`;
+  return `${match[1]}.${match[2]}@students.ku.ac.ke`;
 }
 
 function addMonths(date: Date, months: number): Date {
@@ -69,16 +74,31 @@ async function consumeOtp(
   return true;
 }
 
+// GET /auth/prefill?email=...&regNumber=...
+// Returns student data for auto-fill on register page
 export async function prefillRegistration(req: Request, res: Response) {
-  const email = (req.query.email as string ?? "").trim().toLowerCase();
-  if (!email) {
-    res.status(400).json({ message: "email query parameter is required" });
+  const emailParam = (req.query.email as string ?? "").trim().toLowerCase();
+  const regNumberParam = (req.query.regNumber as string ?? "").trim().toUpperCase();
+
+  let lookupEmail = emailParam;
+
+  // If reg number provided, derive the email
+  if (regNumberParam && REG_NUMBER_REGEX.test(regNumberParam)) {
+    const derived = suggestEmailFromRegNumber(regNumberParam);
+    if (derived) lookupEmail = derived;
+  }
+
+  if (!lookupEmail) {
+    res.status(400).json({ message: "email or regNumber query parameter is required" });
     return;
   }
-  const rows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+
+  const rows = await db.select().from(usersTable).where(eq(usersTable.email, lookupEmail)).limit(1);
   const user = rows[0];
   if (!user) {
-    res.json({ exists: false, feeCleared: true });
+    // Return suggested email even if user not found (so frontend can auto-fill the email)
+    const suggestedEmail = regNumberParam ? suggestEmailFromRegNumber(regNumberParam) : null;
+    res.json({ exists: false, feeCleared: true, suggestedEmail });
     return;
   }
   const feeCleared = user.feeStatus === "cleared";
@@ -91,17 +111,23 @@ export async function prefillRegistration(req: Request, res: Response) {
     courseId: user.courseId,
     hostelId: user.hostelId,
     alreadyActive: user.status === "active",
+    suggestedEmail: lookupEmail,
+    registrationNumber: user.registrationNumber,
   });
 }
 
 export async function register(req: Request, res: Response) {
-  const { name, email, password, gender, courseId, hostelId } = (req.body ?? {}) as Record<string, string>;
+  const { name, email, password, gender, courseId, hostelId, registrationNumber } = (req.body ?? {}) as Record<string, string>;
   if (!name || !email || !password || !gender || !courseId) {
     res.status(400).json({ message: "Name, email, password, gender and course are required" });
     return;
   }
   if (!EMAIL_REGEX.test(email)) {
     res.status(400).json({ message: "Email must be in the form 12345.1234@students.ku.ac.ke" });
+    return;
+  }
+  if (registrationNumber && !REG_NUMBER_REGEX.test(registrationNumber)) {
+    res.status(400).json({ message: "Registration number must be in the format J31/4338/2022 or J31S/4338/2022" });
     return;
   }
   if (password.length < 8) {
@@ -131,7 +157,12 @@ export async function register(req: Request, res: Response) {
     });
     return;
   }
-  const regNo = extractRegistrationNumber(email);
+
+  // Derive registration number from email if not provided
+  const emailMatch = email.match(/^(\d{1,6})\.{1,2}(\d{4})@/);
+  const derivedRegNo = registrationNumber ?? (emailMatch ? null : null);
+  const finalRegNo = registrationNumber ?? (emailMatch ? null : null);
+
   const expiresAt = addMonths(new Date(), REGISTRATION_VALID_MONTHS);
   if (existing[0]) {
     await db
@@ -141,8 +172,8 @@ export async function register(req: Request, res: Response) {
         passwordHash: hashPassword(password),
         gender,
         courseId,
-        hostelId,
-        registrationNumber: regNo,
+        hostelId: hostelId ?? null,
+        registrationNumber: finalRegNo ?? existing[0].registrationNumber,
         registrationExpiresAt: expiresAt,
       })
       .where(eq(usersTable.id, existing[0].id));
@@ -155,8 +186,8 @@ export async function register(req: Request, res: Response) {
       status: "pending_otp",
       gender,
       courseId,
-      hostelId,
-      registrationNumber: regNo,
+      hostelId: hostelId ?? null,
+      registrationNumber: finalRegNo ?? null,
       registrationExpiresAt: expiresAt,
     });
   }
@@ -210,13 +241,23 @@ export async function login(req: Request, res: Response) {
     res.status(400).json({ message: "identifier and password are required" });
     return;
   }
-  const isEmail = identifier.includes("@");
+  // Support login by email, registration number, or derived email from reg number
+  let lookupEmail = identifier;
+  if (!identifier.includes("@")) {
+    // Could be a registration number
+    if (REG_NUMBER_REGEX.test(identifier.toUpperCase())) {
+      const derived = suggestEmailFromRegNumber(identifier.toUpperCase());
+      if (derived) lookupEmail = derived;
+    }
+  }
+
+  const isEmail = lookupEmail.includes("@");
   const userRows = await db
     .select()
     .from(usersTable)
     .where(
       isEmail
-        ? eq(usersTable.email, identifier)
+        ? eq(usersTable.email, lookupEmail)
         : eq(usersTable.registrationNumber, identifier),
     )
     .limit(1);

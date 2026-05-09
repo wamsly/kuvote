@@ -41,6 +41,10 @@ export function getListMyApplicationsQueryKey() { return ["candidates", "my-appl
 export function getAdminListPollsQueryKey() { return ["admin", "polls"] as const; }
 export function getAdminListUsersQueryKey() { return ["admin", "users"] as const; }
 export function getAdminListCandidatesQueryKey() { return ["admin", "candidates"] as const; }
+export function getAdminReportsQueryKey() { return ["admin", "reports"] as const; }
+export function getAdminAuditLogQueryKey() { return ["admin", "audit"] as const; }
+export function getApplicationSettingsQueryKey(pollId?: string) { return ["candidates", "application-settings", pollId] as const; }
+export function getAdminApplicationSettingsQueryKey(pollId?: string) { return ["admin", "application-settings", pollId] as const; }
 
 export function useListPolls(opts?: QueryOpts<unknown>) {
   return useQuery({
@@ -101,50 +105,11 @@ export function useListMyApplications(opts?: QueryOpts<unknown>) {
   });
 }
 
-export function useAdminDashboard(opts?: QueryOpts<unknown>) {
+export function useGetApplicationSettings(pollId: string, opts?: QueryOpts<unknown>) {
   return useQuery({
-    queryKey: ["admin", "dashboard"],
-    queryFn: () => apiFetch("/admin/dashboard"),
-    ...opts?.query,
-  });
-}
-
-export function useAdminListPolls(opts?: QueryOpts<unknown>) {
-  return useQuery({
-    queryKey: getAdminListPollsQueryKey(),
-    queryFn: () => apiFetch("/admin/polls"),
-    ...opts?.query,
-  });
-}
-
-export function useAdminListUsers(opts?: QueryOpts<unknown>) {
-  return useQuery({
-    queryKey: getAdminListUsersQueryKey(),
-    queryFn: () => apiFetch("/admin/users"),
-    ...opts?.query,
-  });
-}
-
-export function useAdminListCandidates(opts?: QueryOpts<unknown>) {
-  return useQuery({
-    queryKey: getAdminListCandidatesQueryKey(),
-    queryFn: () => apiFetch("/admin/candidates"),
-    ...opts?.query,
-  });
-}
-
-export function useAdminAuditLog(opts?: QueryOpts<unknown>) {
-  return useQuery({
-    queryKey: ["admin", "audit"],
-    queryFn: () => apiFetch("/admin/audit"),
-    ...opts?.query,
-  });
-}
-
-export function useAdminReports(opts?: QueryOpts<unknown>) {
-  return useQuery({
-    queryKey: ["admin", "reports"],
-    queryFn: () => apiFetch("/admin/reports"),
+    queryKey: opts?.query?.queryKey ?? getApplicationSettingsQueryKey(pollId),
+    queryFn: () => apiFetch(`/candidates/application-settings/${pollId}`),
+    enabled: Boolean(pollId),
     ...opts?.query,
   });
 }
@@ -174,6 +139,107 @@ export function useListPositions(opts?: QueryOpts<unknown>) {
     staleTime: Infinity,
     ...opts?.query,
   });
+}
+
+export function useAdminListPolls(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: getAdminListPollsQueryKey(),
+    queryFn: () => apiFetch("/admin/polls"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminListUsers(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: getAdminListUsersQueryKey(),
+    queryFn: () => apiFetch("/admin/users"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminListCandidates(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: getAdminListCandidatesQueryKey(),
+    queryFn: () => apiFetch("/admin/candidates"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminReports(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: getAdminReportsQueryKey(),
+    queryFn: () => apiFetch("/admin/reports"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminElectionResultsReport(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "reports", "election-results"],
+    queryFn: () => apiFetch("/admin/reports/election-results"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminVoterTurnoutReport(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "reports", "voter-turnout"],
+    queryFn: () => apiFetch("/admin/reports/voter-turnout"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminCandidateReport(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "reports", "candidate-report"],
+    queryFn: () => apiFetch("/admin/reports/candidate-report"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminVoterParticipationReport(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "reports", "voter-participation"],
+    queryFn: () => apiFetch("/admin/reports/voter-participation"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminRejectedCandidatesReport(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "reports", "rejected-candidates"],
+    queryFn: () => apiFetch("/admin/reports/rejected-candidates"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminDashboard(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: ["admin", "dashboard"],
+    queryFn: () => apiFetch("/admin/dashboard"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminAuditLog(opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: getAdminAuditLogQueryKey(),
+    queryFn: () => apiFetch("/admin/audit"),
+    ...opts?.query,
+  });
+}
+
+export function useAdminGetApplicationSettings(pollId: string, opts?: QueryOpts<unknown>) {
+  return useQuery({
+    queryKey: opts?.query?.queryKey ?? getAdminApplicationSettingsQueryKey(pollId),
+    queryFn: () => apiFetch(`/admin/polls/${pollId}/application-settings`),
+    enabled: Boolean(pollId),
+    ...opts?.query,
+  });
+}
+
+export function useGetPollDetailsAdmin(pollId: string, opts?: QueryOpts<unknown>) {
+  return useGetPollDetails(pollId, opts);
 }
 
 export function useStudentLogin() {
@@ -220,8 +286,15 @@ export function useChangePassword() {
 
 export function useApplyCandidate() {
   return useMutation({
-    mutationFn: ({ data }: { data: { pollId: string; seatId: string; manifesto: string } }) =>
+    mutationFn: ({ data }: { data: { pollId: string; seatId: string; manifesto: string; slogan?: string; bio?: string } }) =>
       apiFetch("/candidates/apply", { method: "POST", body: JSON.stringify(data) }),
+  });
+}
+
+export function useUploadCandidateDocument() {
+  return useMutation({
+    mutationFn: ({ candidateId, data }: { candidateId: string; data: { documentName: string; documentType: string; fileData: string; fileName: string } }) =>
+      apiFetch(`/candidates/${candidateId}/upload-document`, { method: "POST", body: JSON.stringify(data) }),
   });
 }
 
@@ -232,6 +305,13 @@ export function useAdminCreatePoll() {
   });
 }
 
+export function useAdminUpdatePoll() {
+  return useMutation({
+    mutationFn: ({ pollId, data }: { pollId: string; data: Record<string, unknown> }) =>
+      apiFetch(`/admin/polls/${pollId}`, { method: "PUT", body: JSON.stringify(data) }),
+  });
+}
+
 export function useAdminLockPoll() {
   return useMutation({
     mutationFn: ({ pollId }: { pollId: string }) =>
@@ -239,10 +319,31 @@ export function useAdminLockPoll() {
   });
 }
 
+export function useAdminUnlockPoll() {
+  return useMutation({
+    mutationFn: ({ pollId }: { pollId: string }) =>
+      apiFetch(`/admin/polls/${pollId}/unlock`, { method: "POST", body: JSON.stringify({}) }),
+  });
+}
+
 export function useAdminDeletePoll() {
   return useMutation({
     mutationFn: ({ pollId }: { pollId: string }) =>
       apiFetch(`/admin/polls/${pollId}`, { method: "DELETE" }),
+  });
+}
+
+export function useAdminOpenApplicationWindow() {
+  return useMutation({
+    mutationFn: ({ pollId, data }: { pollId: string; data?: { timerDurationMinutes?: number } }) =>
+      apiFetch(`/admin/polls/${pollId}/open-applications`, { method: "POST", body: JSON.stringify(data ?? {}) }),
+  });
+}
+
+export function useAdminCloseApplicationWindow() {
+  return useMutation({
+    mutationFn: ({ pollId }: { pollId: string }) =>
+      apiFetch(`/admin/polls/${pollId}/close-applications`, { method: "POST", body: JSON.stringify({}) }),
   });
 }
 
@@ -264,6 +365,13 @@ export function useAdminPromoteUser() {
   return useMutation({
     mutationFn: ({ userId }: { userId: string }) =>
       apiFetch(`/admin/users/${userId}/promote`, { method: "POST", body: JSON.stringify({}) }),
+  });
+}
+
+export function useAdminRemoveVoter() {
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      apiFetch(`/admin/users/${userId}`, { method: "DELETE" }),
   });
 }
 
@@ -290,7 +398,7 @@ export function useAdminAddCandidate() {
 
 export function useRegister() {
   return useMutation({
-    mutationFn: ({ data }: { data: { name: string; email: string; password: string; gender: string; courseId: string; hostelId?: string } }) =>
+    mutationFn: ({ data }: { data: { name: string; email: string; password: string; gender: string; courseId: string; hostelId?: string; registrationNumber?: string } }) =>
       apiFetch("/auth/register", { method: "POST", body: JSON.stringify(data) }),
   });
 }
@@ -306,5 +414,16 @@ export function useResendOtp() {
   return useMutation({
     mutationFn: ({ data }: { data: { email: string } }) =>
       apiFetch("/auth/resend-otp", { method: "POST", body: JSON.stringify(data) }),
+  });
+}
+
+export function usePrefillRegistration() {
+  return useMutation({
+    mutationFn: ({ email, regNumber }: { email?: string; regNumber?: string }) => {
+      const params = new URLSearchParams();
+      if (email) params.set("email", email);
+      if (regNumber) params.set("regNumber", regNumber);
+      return apiFetch(`/auth/prefill?${params.toString()}`);
+    },
   });
 }

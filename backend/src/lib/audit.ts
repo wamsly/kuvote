@@ -7,6 +7,7 @@ export async function audit(entry: {
   actorRole?: string | null;
   target?: string | null;
   details?: string | null;
+  ipAddress?: string | null;
 }) {
   try {
     await db.insert(auditLogTable).values({
@@ -15,6 +16,7 @@ export async function audit(entry: {
       actorRole: entry.actorRole ?? null,
       target: entry.target ?? null,
       details: entry.details ?? null,
+      ipAddress: entry.ipAddress ?? null,
     });
   } catch (err) {
     logger.warn({ err }, "Failed to write audit log entry");
