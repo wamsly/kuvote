@@ -21,7 +21,15 @@ import { Loader2, ArrowRight, MailCheck, RotateCcw, CheckCircle2, XCircle, Alert
 import { motion, AnimatePresence } from "framer-motion";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
+// Registration number: J31/4338/2022 (1 capital letter) or J31S/4338/2022 (2 capital letters)
+const REG_NUMBER_REGEX = /^[A-Z]{1,2}\d+\/\d+\/\d{4}$/;
 const EMAIL_REGEX = /^\d{1,6}\.{1,2}\d{4}@students\.ku\.ac\.ke$/;
+
+function suggestEmailFromRegNumber(regNo: string): string | null {
+  const match = regNo.match(/^[A-Z]{1,2}\d+\/(\d+)\/(\d{4})$/);
+  if (!match) return null;
+  return `${match[1]}.${match[2]}@students.ku.ac.ke`;
+}
 
 type PrefillData = {
   exists: boolean;
@@ -32,11 +40,14 @@ type PrefillData = {
   courseId?: string;
   hostelId?: string;
   alreadyActive?: boolean;
+  suggestedEmail?: string;
 };
 
 export default function RegisterPage() {
   const [step, setStep] = useState<"form" | "otp">("form");
   const [name, setName] = useState("");
+  const [regNumber, setRegNumber] = useState("");
+  const [regNumberError, setRegNumberError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -61,78 +72,68 @@ export default function RegisterPage() {
 
   const schools = (schoolsQ.data ?? []) as Array<any>;
   const hostels = (hostelsQ.data ?? []) as Array<any>;
-  const departments = useMemo(
-    () => schools.find((s) => s.id === schoolId)?.departments ?? [],
-    [schools, schoolId],
-  );
-  const courses = useMemo(
-    () => departments.find((d: any) => d.id === departmentId)?.courses ?? [],
-    [departments, departmentId],
-  );
-  const hostelOptions = useMemo(
-    () => (gender ? hostels.filter((h) => h.gender === gender) : hostels),
-    [hostels, gender],
-  );
+  const departments = useMemo(() => schools.find((s) => s.id === schoolId)?.departments ?? [], [schools, schoolId]);
+  const courses = useMemo(() => departments.find((d: any) => d.id === departmentId)?.courses ?? [], [departments, departmentId]);
+  const hostelOptions = useMemo(() => (gender ? hostels.filter((h) => h.gender === gender) : hostels), [hostels, gender]);
 
   const feeBlocked = prefillData?.exists === true && prefillData.feeCleared === false;
 
-  const handleEmailBlur = useCallback(async () => {
-    const trimmed = email.trim().toLowerCase();
-    if (!EMAIL_REGEX.test(trimmed)) {
-      setPrefillData(null);
-      return;
-    }
+  const doFetch = useCallback(async (fetchEmail: string) => {
+    if (!fetchEmail) return;
     setPrefillLoading(true);
     try {
-      const res = await fetch(`/api/auth/prefill?email=${encodeURIComponent(trimmed)}`);
+      const res = await fetch(`/api/auth/prefill?email=${encodeURIComponent(fetchEmail)}`);
       const data: PrefillData = await res.json();
       setPrefillData(data);
       if (data.exists && !data.alreadyActive) {
         if (data.name) setName(data.name);
         if (data.gender) setGender(data.gender as "male" | "female");
         if (data.courseId) setCourseId(data.courseId);
-        if (data.hostelId) {
-          setHostelId(data.hostelId);
-          setIsResident("yes");
-        }
+        if (data.hostelId) { setHostelId(data.hostelId); setIsResident("yes"); }
       }
-    } catch {
-      setPrefillData(null);
-    } finally {
-      setPrefillLoading(false);
+    } catch { setPrefillData(null); }
+    finally { setPrefillLoading(false); }
+  }, []);
+
+  const handleRegNumberChange = (val: string) => {
+    const upper = val.toUpperCase();
+    setRegNumber(upper);
+    setRegNumberError("");
+    if (!upper) { setPrefillData(null); setEmail(""); return; }
+    if (REG_NUMBER_REGEX.test(upper)) {
+      const suggested = suggestEmailFromRegNumber(upper);
+      if (suggested) {
+        setEmail(suggested);
+        doFetch(suggested);
+      }
+      setRegNumberError("");
+    } else if (upper.length > 4) {
+      setRegNumberError("Format must be J31/4338/2022 or J31S/4338/2022");
     }
-  }, [email]);
+  };
+
+  const handleEmailBlur = useCallback(async () => {
+    const trimmed = email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(trimmed)) { setPrefillData(null); return; }
+    doFetch(trimmed);
+  }, [email, doFetch]);
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (regNumber && !REG_NUMBER_REGEX.test(regNumber)) {
+      toast.error("Registration number must be J31/4338/2022 or J31S/4338/2022");
+      return;
+    }
     if (!EMAIL_REGEX.test(email)) {
-      toast.error("Email must look like 12345.1234@students.ku.ac.ke");
+      toast.error("Email must look like 4338.2022@students.ku.ac.ke");
       return;
     }
-    if (feeBlocked) {
-      toast.error("Your fee balance is not cleared. Please visit the Finance Office.");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-    if (password !== confirm) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    if (!gender || !courseId) {
-      toast.error("Please complete all required fields");
-      return;
-    }
-    if (isResident === "yes" && !hostelId) {
-      toast.error("Please select your hostel");
-      return;
-    }
-    if (isResident === "") {
-      toast.error("Please indicate whether you are a hostel resident");
-      return;
-    }
+    if (feeBlocked) { toast.error("Your fee balance is not cleared. Please visit the Finance Office."); return; }
+    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+    if (password !== confirm) { toast.error("Passwords do not match"); return; }
+    if (!gender || !courseId) { toast.error("Please complete all required fields"); return; }
+    if (isResident === "yes" && !hostelId) { toast.error("Please select your hostel"); return; }
+    if (isResident === "") { toast.error("Please indicate whether you are a hostel resident"); return; }
     try {
       const r = (await register.mutateAsync({
         data: {
@@ -142,6 +143,7 @@ export default function RegisterPage() {
           gender,
           courseId,
           hostelId: isResident === "yes" ? hostelId : undefined,
+          registrationNumber: regNumber || undefined,
         } as any,
       })) as any;
       setDevOtpHint(r?.devOtp ?? null);
@@ -149,30 +151,18 @@ export default function RegisterPage() {
       setStep("otp");
     } catch (err: any) {
       const code = err?.response?.data?.code ?? err?.code;
-      if (code === "FEE_NOT_CLEARED") {
-        toast.error("Your fee balance is not cleared. Please visit the Finance Office.");
-      } else {
-        toast.error(err?.response?.data?.message ?? err?.message ?? "Could not register");
-      }
+      if (code === "FEE_NOT_CLEARED") { toast.error("Your fee balance is not cleared. Please visit the Finance Office."); }
+      else { toast.error(err?.response?.data?.message ?? err?.message ?? "Could not register"); }
     }
   };
 
   const submitOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otpCode.length !== 6) {
-      toast.error("Enter the 6-digit code");
-      return;
-    }
+    if (otpCode.length !== 6) { toast.error("Enter the 6-digit code"); return; }
     try {
       const r = (await verify.mutateAsync({ data: { email, otp: otpCode } })) as any;
-      if (r?.token && r?.user) {
-        login(r.token, r.user);
-        toast.success(`Welcome to KUVOTE, ${r.user.name}`);
-        navigate("/dashboard");
-      }
-    } catch (err: any) {
-      toast.error(err?.message ?? "Code is invalid or expired");
-    }
+      if (r?.token && r?.user) { login(r.token, r.user); toast.success(`Welcome to KUVOTE, ${r.user.name}`); navigate("/dashboard"); }
+    } catch (err: any) { toast.error(err?.message ?? "Code is invalid or expired"); }
   };
 
   const handleResend = async () => {
@@ -180,9 +170,7 @@ export default function RegisterPage() {
       const r = (await resend.mutateAsync({ data: { email } })) as any;
       setDevOtpHint(r?.devOtp ?? null);
       toast.success("New code sent");
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not resend code");
-    }
+    } catch (err: any) { toast.error(err?.message ?? "Could not resend code"); }
   };
 
   return (
@@ -192,24 +180,34 @@ export default function RegisterPage() {
         <ThemeToggle />
       </header>
       <div className="container mx-auto flex flex-1 items-center justify-center px-4 py-8">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="w-full max-w-2xl"
-        >
+        <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="w-full max-w-2xl">
           {step === "form" ? (
             <Card className="border-border/70 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl">Create your KUVOTE account</CardTitle>
-                <CardDescription>
-                  Use your KU students email. You will get a 6-digit verification code.
-                </CardDescription>
+                <CardDescription>Enter your registration number to auto-fill your details, or type your KU student email directly.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={submitForm} className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="regNumber">Registration number</Label>
+                      <div className="relative">
+                        <Input
+                          id="regNumber"
+                          type="text"
+                          placeholder="e.g. J31/4338/2022 or J31S/4338/2022"
+                          value={regNumber}
+                          onChange={(e) => handleRegNumberChange(e.target.value)}
+                          className={regNumberError ? "border-destructive" : ""}
+                        />
+                        {prefillLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                      </div>
+                      {regNumberError && <p className="text-xs text-destructive">{regNumberError}</p>}
+                      <p className="text-xs text-muted-foreground">Allowed formats: <span className="font-mono">J31/4338/2022</span> or <span className="font-mono">J31S/4338/2022</span>. Your email will be suggested automatically.</p>
+                    </div>
+
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="email">University email</Label>
                       <div className="relative">
@@ -217,38 +215,26 @@ export default function RegisterPage() {
                           id="email"
                           type="email"
                           required
-                          placeholder="12345.1234@students.ku.ac.ke"
+                          placeholder="4338.2022@students.ku.ac.ke"
                           value={email}
                           onChange={(e) => { setEmail(e.target.value); setPrefillData(null); }}
                           onBlur={handleEmailBlur}
                           className="pr-9"
                         />
-                        {prefillLoading && (
-                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                        )}
+                        {prefillLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Must follow the official KU students email format.
-                      </p>
+                      <p className="text-xs text-muted-foreground">Auto-suggested from your registration number.</p>
                     </div>
 
                     <AnimatePresence>
                       {prefillData?.exists && (
-                        <motion.div
-                          key="fee-banner"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="md:col-span-2 overflow-hidden"
-                        >
+                        <motion.div key="fee-banner" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="md:col-span-2 overflow-hidden">
                           {feeBlocked ? (
                             <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
                               <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                               <div>
                                 <p className="font-semibold text-destructive">Fee balance not cleared</p>
-                                <p className="text-muted-foreground mt-0.5">
-                                  Your fee status is <span className="font-medium capitalize">{prefillData.feeStatus}</span>. Please visit the Finance Office to clear your balance before registering.
-                                </p>
+                                <p className="text-muted-foreground mt-0.5">Your fee status is <span className="font-medium capitalize">{prefillData.feeStatus}</span>. Please visit the Finance Office to clear your balance before registering.</p>
                               </div>
                             </div>
                           ) : prefillData.alreadyActive ? (
@@ -256,10 +242,7 @@ export default function RegisterPage() {
                               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-chart-3" />
                               <div>
                                 <p className="font-semibold">Account already exists</p>
-                                <p className="text-muted-foreground mt-0.5">
-                                  An account with this email is already registered.{" "}
-                                  <Link href="/login" className="font-medium text-primary hover:underline">Sign in instead.</Link>
-                                </p>
+                                <p className="text-muted-foreground mt-0.5">An account with this email is already registered. <Link href="/login" className="font-medium text-primary hover:underline">Sign in instead.</Link></p>
                               </div>
                             </div>
                           ) : (
@@ -267,9 +250,7 @@ export default function RegisterPage() {
                               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
                               <div>
                                 <p className="font-semibold text-green-700 dark:text-green-300">Fee cleared — eligible to register</p>
-                                <p className="text-muted-foreground mt-0.5">
-                                  Your details have been pre-filled from our records.
-                                </p>
+                                <p className="text-muted-foreground mt-0.5">Your details have been pre-filled from our records.</p>
                               </div>
                             </div>
                           )}
@@ -279,191 +260,83 @@ export default function RegisterPage() {
 
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="name">Full name</Label>
-                      <Input
-                        id="name"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        disabled={feeBlocked}
-                      />
+                      <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} disabled={feeBlocked} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        required
-                        minLength={8}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={feeBlocked}
-                      />
+                      <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} disabled={feeBlocked} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm">Confirm password</Label>
-                      <Input
-                        id="confirm"
-                        type="password"
-                        required
-                        minLength={8}
-                        value={confirm}
-                        onChange={(e) => setConfirm(e.target.value)}
-                        disabled={feeBlocked}
-                      />
+                      <Input id="confirm" type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} disabled={feeBlocked} />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Gender</Label>
-                      <RadioGroup
-                        value={gender}
-                        onValueChange={(v) => {
-                          setGender(v as any);
-                          setHostelId("");
-                        }}
-                        className="flex gap-4"
-                        disabled={feeBlocked}
-                      >
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="male" id="g-male" />
-                          <Label htmlFor="g-male" className="font-normal">Male</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="female" id="g-female" />
-                          <Label htmlFor="g-female" className="font-normal">Female</Label>
-                        </div>
+                      <RadioGroup value={gender} onValueChange={(v) => { setGender(v as any); setHostelId(""); }} className="flex gap-4" disabled={feeBlocked}>
+                        <div className="flex items-center gap-2"><RadioGroupItem value="male" id="g-male" /><Label htmlFor="g-male" className="font-normal">Male</Label></div>
+                        <div className="flex items-center gap-2"><RadioGroupItem value="female" id="g-female" /><Label htmlFor="g-female" className="font-normal">Female</Label></div>
                       </RadioGroup>
                     </div>
                     <div className="space-y-2">
                       <Label>School</Label>
-                      <Select
-                        value={schoolId}
-                        onValueChange={(v) => { setSchoolId(v); setDepartmentId(""); setCourseId(""); }}
-                        disabled={feeBlocked}
-                      >
+                      <Select value={schoolId} onValueChange={(v) => { setSchoolId(v); setDepartmentId(""); setCourseId(""); }} disabled={feeBlocked}>
                         <SelectTrigger><SelectValue placeholder="Select school" /></SelectTrigger>
-                        <SelectContent>
-                          {schools.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                          ))}
-                        </SelectContent>
+                        <SelectContent>{schools.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>Department</Label>
-                      <Select
-                        value={departmentId}
-                        onValueChange={(v) => { setDepartmentId(v); setCourseId(""); }}
-                        disabled={!schoolId || feeBlocked}
-                      >
+                      <Select value={departmentId} onValueChange={(v) => { setDepartmentId(v); setCourseId(""); }} disabled={!schoolId || feeBlocked}>
                         <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
-                        <SelectContent>
-                          {departments.map((d: any) => (
-                            <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                          ))}
-                        </SelectContent>
+                        <SelectContent>{departments.map((d: any) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Course</Label>
-                      <Select
-                        value={courseId}
-                        onValueChange={setCourseId}
-                        disabled={!departmentId || feeBlocked}
-                      >
+                      <Select value={courseId} onValueChange={setCourseId} disabled={!departmentId || feeBlocked}>
                         <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                        <SelectContent>
-                          {courses.map((c: any) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              {c.name} ({c.level})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
+                        <SelectContent>{courses.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name} ({c.level})</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
-
                     <div className="space-y-2 md:col-span-2">
                       <Label>Do you live in a university hostel?</Label>
-                      <RadioGroup
-                        value={isResident}
-                        onValueChange={(v) => {
-                          setIsResident(v as any);
-                          if (v === "no") setHostelId("");
-                        }}
-                        className="flex gap-4"
-                        disabled={feeBlocked}
-                      >
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="yes" id="r-yes" />
-                          <Label htmlFor="r-yes" className="font-normal">Yes, I live in a hostel</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="no" id="r-no" />
-                          <Label htmlFor="r-no" className="font-normal">No, I live off-campus</Label>
-                        </div>
+                      <RadioGroup value={isResident} onValueChange={(v) => { setIsResident(v as any); if (v === "no") setHostelId(""); }} className="flex gap-4" disabled={feeBlocked}>
+                        <div className="flex items-center gap-2"><RadioGroupItem value="yes" id="r-yes" /><Label htmlFor="r-yes" className="font-normal">Yes, I live in a hostel</Label></div>
+                        <div className="flex items-center gap-2"><RadioGroupItem value="no" id="r-no" /><Label htmlFor="r-no" className="font-normal">No, I live off-campus</Label></div>
                       </RadioGroup>
                     </div>
-
                     <AnimatePresence>
                       {isResident === "yes" && (
-                        <motion.div
-                          key="hostel-select"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="space-y-2 md:col-span-2 overflow-hidden"
-                        >
+                        <motion.div key="hostel-select" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 md:col-span-2 overflow-hidden">
                           <Label>Hostel</Label>
                           <Select value={hostelId} onValueChange={setHostelId} disabled={!gender || feeBlocked}>
-                            <SelectTrigger>
-                              <SelectValue placeholder={gender ? "Select hostel" : "Pick gender first"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {hostelOptions.map((h: any) => (
-                                <SelectItem key={h.id} value={h.id}>
-                                  {h.name} — {h.zone} zone
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
+                            <SelectTrigger><SelectValue placeholder={gender ? "Select hostel" : "Pick gender first"} /></SelectTrigger>
+                            <SelectContent>{hostelOptions.map((h: any) => <SelectItem key={h.id} value={h.id}>{h.name} — {h.zone} zone</SelectItem>)}</SelectContent>
                           </Select>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full gap-2"
-                    disabled={register.isPending || feeBlocked || prefillData?.alreadyActive}
-                  >
+                  <Button type="submit" className="w-full gap-2" disabled={register.isPending || feeBlocked || prefillData?.alreadyActive}>
                     {register.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                     Continue
                   </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Have an account?{" "}
-                    <Link href="/login" className="font-medium text-primary hover:underline">Sign in</Link>
-                  </p>
+                  <p className="text-center text-sm text-muted-foreground">Have an account? <Link href="/login" className="font-medium text-primary hover:underline">Sign in</Link></p>
                 </form>
               </CardContent>
             </Card>
           ) : (
             <Card className="border-border/70 shadow-lg">
               <CardHeader>
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-primary">
-                  <MailCheck className="h-5 w-5" />
-                </div>
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-primary"><MailCheck className="h-5 w-5" /></div>
                 <CardTitle className="text-2xl">Verify your email</CardTitle>
-                <CardDescription>
-                  Enter the 6-digit code we sent to <span className="font-medium text-foreground">{email}</span>
-                </CardDescription>
+                <CardDescription>Enter the 6-digit code we sent to <span className="font-medium text-foreground">{email}</span></CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={submitOtp} className="space-y-6">
                   <div className="flex justify-center">
                     <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
-                      <InputOTPGroup>
-                        {[0, 1, 2, 3, 4, 5].map((i) => (
-                          <InputOTPSlot key={i} index={i} />
-                        ))}
-                      </InputOTPGroup>
+                      <InputOTPGroup>{[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
                     </InputOTP>
                   </div>
                   {devOtpHint && (
@@ -475,12 +348,8 @@ export default function RegisterPage() {
                     {verify.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify and sign in"}
                   </Button>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <button type="button" onClick={() => setStep("form")} className="hover:underline">
-                      Edit details
-                    </button>
-                    <button type="button" onClick={handleResend} className="flex items-center gap-1 hover:underline">
-                      <RotateCcw className="h-3 w-3" /> Resend code
-                    </button>
+                    <button type="button" onClick={() => setStep("form")} className="hover:underline">Edit details</button>
+                    <button type="button" onClick={handleResend} className="flex items-center gap-1 hover:underline"><RotateCcw className="h-3 w-3" /> Resend code</button>
                   </div>
                 </form>
               </CardContent>

@@ -48,8 +48,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // ../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js"(exports, module) {
-    var fs = __require("fs");
-    var path2 = __require("path");
+    var fs2 = __require("fs");
+    var path4 = __require("path");
     var os = __require("os");
     var crypto3 = __require("crypto");
     var TIPS = [
@@ -180,7 +180,7 @@ var require_main = __commonJS({
       if (options && options.path && options.path.length > 0) {
         if (Array.isArray(options.path)) {
           for (const filepath of options.path) {
-            if (fs.existsSync(filepath)) {
+            if (fs2.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -188,15 +188,15 @@ var require_main = __commonJS({
           possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
         }
       } else {
-        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
+        possibleVaultPath = path4.resolve(process.cwd(), ".env.vault");
       }
-      if (fs.existsSync(possibleVaultPath)) {
+      if (fs2.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path2.join(os.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path4.join(os.homedir(), envPath.slice(1)) : envPath;
     }
     function _configVault(options) {
       const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || options && options.debug);
@@ -213,7 +213,7 @@ var require_main = __commonJS({
       return { parsed };
     }
     function configDotenv(options) {
-      const dotenvPath = path2.resolve(process.cwd(), ".env");
+      const dotenvPath = path4.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       let processEnv = process.env;
       if (options && options.processEnv != null) {
@@ -241,13 +241,13 @@ var require_main = __commonJS({
       }
       let lastError;
       const parsedAll = {};
-      for (const path3 of optionPaths) {
+      for (const path5 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs.readFileSync(path3, { encoding }));
+          const parsed = DotenvModule.parse(fs2.readFileSync(path5, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`failed to load ${path3} ${e.message}`);
+            _debug(`failed to load ${path5} ${e.message}`);
           }
           lastError = e;
         }
@@ -260,7 +260,7 @@ var require_main = __commonJS({
         const shortPaths = [];
         for (const filePath of optionPaths) {
           try {
-            const relative = path2.relative(process.cwd(), filePath);
+            const relative = path4.relative(process.cwd(), filePath);
             shortPaths.push(relative);
           } catch (e) {
             if (debug) {
@@ -15521,11 +15521,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path2) {
-      if (!path2 || typeof path2 !== "string") {
+    function lookup(path4) {
+      if (!path4 || typeof path4 !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path2).toLowerCase().slice(1);
+      var extension2 = extname("x." + path4).toLowerCase().slice(1);
       if (!extension2) {
         return false;
       }
@@ -18996,13 +18996,13 @@ var require_view = __commonJS({
   "../node_modules/.pnpm/express@5.2.1/node_modules/express/lib/view.js"(exports, module) {
     "use strict";
     var debug = require_src()("express:view");
-    var path2 = __require("node:path");
-    var fs = __require("node:fs");
-    var dirname = path2.dirname;
-    var basename = path2.basename;
-    var extname = path2.extname;
-    var join = path2.join;
-    var resolve = path2.resolve;
+    var path4 = __require("node:path");
+    var fs2 = __require("node:fs");
+    var dirname = path4.dirname;
+    var basename = path4.basename;
+    var extname = path4.extname;
+    var join = path4.join;
+    var resolve = path4.resolve;
     module.exports = View2;
     function View2(name, options) {
       var opts = options || {};
@@ -19031,17 +19031,17 @@ var require_view = __commonJS({
       this.path = this.lookup(fileName);
     }
     View2.prototype.lookup = function lookup(name) {
-      var path3;
+      var path5;
       var roots = [].concat(this.root);
       debug('lookup "%s"', name);
-      for (var i = 0; i < roots.length && !path3; i++) {
+      for (var i = 0; i < roots.length && !path5; i++) {
         var root = roots[i];
         var loc = resolve(root, name);
         var dir = dirname(loc);
         var file = basename(loc);
-        path3 = this.resolve(dir, file);
+        path5 = this.resolve(dir, file);
       }
-      return path3;
+      return path5;
     };
     View2.prototype.render = function render(options, callback) {
       var sync = true;
@@ -19063,21 +19063,21 @@ var require_view = __commonJS({
     };
     View2.prototype.resolve = function resolve2(dir, file) {
       var ext = this.ext;
-      var path3 = join(dir, file);
-      var stat = tryStat(path3);
+      var path5 = join(dir, file);
+      var stat = tryStat(path5);
       if (stat && stat.isFile()) {
-        return path3;
+        return path5;
       }
-      path3 = join(dir, basename(file, ext), "index" + ext);
-      stat = tryStat(path3);
+      path5 = join(dir, basename(file, ext), "index" + ext);
+      stat = tryStat(path5);
       if (stat && stat.isFile()) {
-        return path3;
+        return path5;
       }
     };
-    function tryStat(path3) {
-      debug('stat "%s"', path3);
+    function tryStat(path5) {
+      debug('stat "%s"', path5);
       try {
-        return fs.statSync(path3);
+        return fs2.statSync(path5);
       } catch (e) {
         return void 0;
       }
@@ -20213,15 +20213,15 @@ var require_dist = __commonJS({
       let index = 0;
       function consumeUntil(end) {
         const output = [];
-        let path2 = "";
+        let path4 = "";
         function writePath() {
-          if (!path2)
+          if (!path4)
             return;
           output.push({
             type: "text",
-            value: encodePath(path2)
+            value: encodePath(path4)
           });
-          path2 = "";
+          path4 = "";
         }
         while (index < chars.length) {
           const value = chars[index++];
@@ -20233,7 +20233,7 @@ var require_dist = __commonJS({
             if (index === chars.length) {
               throw new PathError(`Unexpected end after \\ at index ${index}`, str);
             }
-            path2 += chars[index++];
+            path4 += chars[index++];
             continue;
           }
           if (value === ":" || value === "*") {
@@ -20277,7 +20277,7 @@ var require_dist = __commonJS({
           if (value === "}" || value === "(" || value === ")" || value === "[" || value === "]" || value === "+" || value === "?" || value === "!") {
             throw new PathError(`Unexpected ${value} at index ${index - 1}`, str);
           }
-          path2 += value;
+          path4 += value;
         }
         if (end) {
           throw new PathError(`Unexpected end at index ${index}, expected ${end}`, str);
@@ -20287,17 +20287,17 @@ var require_dist = __commonJS({
       }
       return new TokenData(consumeUntil(""), str);
     }
-    function compile(path2, options = {}) {
+    function compile(path4, options = {}) {
       const { encode = encodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const data = typeof path2 === "object" ? path2 : parse(path2, options);
+      const data = typeof path4 === "object" ? path4 : parse(path4, options);
       const fn = tokensToFunction(data.tokens, delimiter, encode);
-      return function path3(params = {}) {
+      return function path5(params = {}) {
         const missing = [];
-        const path4 = fn(params, missing);
+        const path6 = fn(params, missing);
         if (missing.length) {
           throw new TypeError(`Missing parameters: ${missing.join(", ")}`);
         }
-        return path4;
+        return path6;
       };
     }
     function tokensToFunction(tokens, delimiter, encode) {
@@ -20359,9 +20359,9 @@ var require_dist = __commonJS({
         return encodeValue(value);
       };
     }
-    function match(path2, options = {}) {
+    function match(path4, options = {}) {
       const { decode = decodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const { regexp, keys } = pathToRegexp(path2, options);
+      const { regexp, keys } = pathToRegexp(path4, options);
       const decoders = keys.map((key) => {
         if (decode === false)
           return NOOP_VALUE;
@@ -20373,7 +20373,7 @@ var require_dist = __commonJS({
         const m = regexp.exec(input);
         if (!m)
           return false;
-        const path3 = m[0];
+        const path5 = m[0];
         const params = /* @__PURE__ */ Object.create(null);
         for (let i = 1; i < m.length; i++) {
           if (m[i] === void 0)
@@ -20382,21 +20382,21 @@ var require_dist = __commonJS({
           const decoder = decoders[i - 1];
           params[key.name] = decoder(m[i]);
         }
-        return { path: path3, params };
+        return { path: path5, params };
       };
     }
-    function pathToRegexp(path2, options = {}) {
+    function pathToRegexp(path4, options = {}) {
       const { delimiter = DEFAULT_DELIMITER, end = true, sensitive = false, trailing = true } = options;
       const keys = [];
       let source = "";
       let combinations = 0;
-      function process2(path3) {
-        if (Array.isArray(path3)) {
-          for (const p of path3)
+      function process2(path5) {
+        if (Array.isArray(path5)) {
+          for (const p of path5)
             process2(p);
           return;
         }
-        const data = typeof path3 === "object" ? path3 : parse(path3, options);
+        const data = typeof path5 === "object" ? path5 : parse(path5, options);
         flatten(data.tokens, 0, [], (tokens) => {
           if (combinations >= 256) {
             throw new PathError("Too many path combinations", data.originalPath);
@@ -20407,7 +20407,7 @@ var require_dist = __commonJS({
           combinations++;
         });
       }
-      process2(path2);
+      process2(path4);
       let pattern = `^(?:${source})`;
       if (trailing)
         pattern += "(?:" + escape2(delimiter) + "$)?";
@@ -20547,18 +20547,18 @@ var require_layer = __commonJS({
     var TRAILING_SLASH_REGEXP = /\/+$/;
     var MATCHING_GROUP_REGEXP = /\((?:\?<(.*?)>)?(?!\?)/g;
     module.exports = Layer;
-    function Layer(path2, options, fn) {
+    function Layer(path4, options, fn) {
       if (!(this instanceof Layer)) {
-        return new Layer(path2, options, fn);
+        return new Layer(path4, options, fn);
       }
-      debug("new %o", path2);
+      debug("new %o", path4);
       const opts = options || {};
       this.handle = fn;
       this.keys = [];
       this.name = fn.name || "<anonymous>";
       this.params = void 0;
       this.path = void 0;
-      this.slash = path2 === "/" && opts.end === false;
+      this.slash = path4 === "/" && opts.end === false;
       function matcher(_path) {
         if (_path instanceof RegExp) {
           const keys = [];
@@ -20597,7 +20597,7 @@ var require_layer = __commonJS({
           decode: decodeParam
         });
       }
-      this.matchers = Array.isArray(path2) ? path2.map(matcher) : [matcher(path2)];
+      this.matchers = Array.isArray(path4) ? path4.map(matcher) : [matcher(path4)];
     }
     Layer.prototype.handleError = function handleError(error, req, res, next) {
       const fn = this.handle;
@@ -20637,9 +20637,9 @@ var require_layer = __commonJS({
         next(err);
       }
     };
-    Layer.prototype.match = function match(path2) {
+    Layer.prototype.match = function match(path4) {
       let match2;
-      if (path2 != null) {
+      if (path4 != null) {
         if (this.slash) {
           this.params = {};
           this.path = "";
@@ -20647,7 +20647,7 @@ var require_layer = __commonJS({
         }
         let i = 0;
         while (!match2 && i < this.matchers.length) {
-          match2 = this.matchers[i](path2);
+          match2 = this.matchers[i](path4);
           i++;
         }
       }
@@ -20675,13 +20675,13 @@ var require_layer = __commonJS({
         throw err;
       }
     }
-    function loosen(path2) {
-      if (path2 instanceof RegExp || path2 === "/") {
-        return path2;
+    function loosen(path4) {
+      if (path4 instanceof RegExp || path4 === "/") {
+        return path4;
       }
-      return Array.isArray(path2) ? path2.map(function(p) {
+      return Array.isArray(path4) ? path4.map(function(p) {
         return loosen(p);
-      }) : String(path2).replace(TRAILING_SLASH_REGEXP, "");
+      }) : String(path4).replace(TRAILING_SLASH_REGEXP, "");
     }
   }
 });
@@ -20697,9 +20697,9 @@ var require_route = __commonJS({
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
     module.exports = Route;
-    function Route(path2) {
-      debug("new %o", path2);
-      this.path = path2;
+    function Route(path4) {
+      debug("new %o", path4);
+      this.path = path4;
       this.stack = [];
       this.methods = /* @__PURE__ */ Object.create(null);
     }
@@ -20907,8 +20907,8 @@ var require_router = __commonJS({
         if (++sync > 100) {
           return setImmediate(next, err);
         }
-        const path2 = getPathname(req);
-        if (path2 == null) {
+        const path4 = getPathname(req);
+        if (path4 == null) {
           return done(layerError);
         }
         let layer;
@@ -20916,7 +20916,7 @@ var require_router = __commonJS({
         let route;
         while (match !== true && idx < stack.length) {
           layer = stack[idx++];
-          match = matchLayer(layer, path2);
+          match = matchLayer(layer, path4);
           route = layer.route;
           if (typeof match !== "boolean") {
             layerError = layerError || match;
@@ -20954,18 +20954,18 @@ var require_router = __commonJS({
           } else if (route) {
             layer.handleRequest(req, res, next);
           } else {
-            trimPrefix(layer, layerError, layerPath, path2);
+            trimPrefix(layer, layerError, layerPath, path4);
           }
           sync = 0;
         });
       }
-      function trimPrefix(layer, layerError, layerPath, path2) {
+      function trimPrefix(layer, layerError, layerPath, path4) {
         if (layerPath.length !== 0) {
-          if (layerPath !== path2.substring(0, layerPath.length)) {
+          if (layerPath !== path4.substring(0, layerPath.length)) {
             next(layerError);
             return;
           }
-          const c = path2[layerPath.length];
+          const c = path4[layerPath.length];
           if (c && c !== "/") {
             next(layerError);
             return;
@@ -20989,7 +20989,7 @@ var require_router = __commonJS({
     };
     Router9.prototype.use = function use(handler) {
       let offset = 0;
-      let path2 = "/";
+      let path4 = "/";
       if (typeof handler !== "function") {
         let arg = handler;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -20997,7 +20997,7 @@ var require_router = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler;
+          path4 = handler;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -21009,8 +21009,8 @@ var require_router = __commonJS({
         if (typeof fn !== "function") {
           throw new TypeError("argument handler must be a function");
         }
-        debug("use %o %s", path2, fn.name || "<anonymous>");
-        const layer = new Layer(path2, {
+        debug("use %o %s", path4, fn.name || "<anonymous>");
+        const layer = new Layer(path4, {
           sensitive: this.caseSensitive,
           strict: false,
           end: false
@@ -21020,9 +21020,9 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router9.prototype.route = function route(path2) {
-      const route2 = new Route(path2);
-      const layer = new Layer(path2, {
+    Router9.prototype.route = function route(path4) {
+      const route2 = new Route(path4);
+      const layer = new Layer(path4, {
         sensitive: this.caseSensitive,
         strict: this.strict,
         end: true
@@ -21035,8 +21035,8 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router9.prototype[method] = function(path2) {
-        const route = this.route(path2);
+      Router9.prototype[method] = function(path4) {
+        const route = this.route(path4);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
@@ -21065,9 +21065,9 @@ var require_router = __commonJS({
       const fqdnIndex = url.substring(0, pathLength).indexOf("://");
       return fqdnIndex !== -1 ? url.substring(0, url.indexOf("/", 3 + fqdnIndex)) : void 0;
     }
-    function matchLayer(layer, path2) {
+    function matchLayer(layer, path4) {
       try {
-        return layer.match(path2);
+        return layer.match(path4);
       } catch (err) {
         return err;
       }
@@ -21295,7 +21295,7 @@ var require_application = __commonJS({
     };
     app3.use = function use(fn) {
       var offset = 0;
-      var path2 = "/";
+      var path4 = "/";
       if (typeof fn !== "function") {
         var arg = fn;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -21303,7 +21303,7 @@ var require_application = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = fn;
+          path4 = fn;
         }
       }
       var fns = flatten.call(slice.call(arguments, offset), Infinity);
@@ -21313,12 +21313,12 @@ var require_application = __commonJS({
       var router9 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router9.use(path2, fn2);
+          return router9.use(path4, fn2);
         }
-        debug(".use app under %s", path2);
-        fn2.mountpath = path2;
+        debug(".use app under %s", path4);
+        fn2.mountpath = path4;
         fn2.parent = this;
-        router9.use(path2, function mounted_app(req, res, next) {
+        router9.use(path4, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -21330,8 +21330,8 @@ var require_application = __commonJS({
       }, this);
       return this;
     };
-    app3.route = function route(path2) {
-      return this.router.route(path2);
+    app3.route = function route(path4) {
+      return this.router.route(path4);
     };
     app3.engine = function engine(ext, fn) {
       if (typeof fn !== "function") {
@@ -21374,7 +21374,7 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app3.path = function path2() {
+    app3.path = function path4() {
       return this.parent ? this.parent.path() + this.mountpath : "";
     };
     app3.enabled = function enabled(setting) {
@@ -21390,17 +21390,17 @@ var require_application = __commonJS({
       return this.set(setting, false);
     };
     methods.forEach(function(method) {
-      app3[method] = function(path2) {
+      app3[method] = function(path4) {
         if (method === "get" && arguments.length === 1) {
-          return this.set(path2);
+          return this.set(path4);
         }
-        var route = this.route(path2);
+        var route = this.route(path4);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
     });
-    app3.all = function all(path2) {
-      var route = this.route(path2);
+    app3.all = function all(path4) {
+      var route = this.route(path4);
       var args = slice.call(arguments, 1);
       for (var i = 0; i < methods.length; i++) {
         route[methods[i]].apply(route, args);
@@ -22310,7 +22310,7 @@ var require_request = __commonJS({
       var subdomains2 = !isIP(hostname) ? hostname.split(".").reverse() : [hostname];
       return subdomains2.slice(offset);
     });
-    defineGetter(req, "path", function path2() {
+    defineGetter(req, "path", function path4() {
       return parse(this).pathname;
     });
     defineGetter(req, "host", function host() {
@@ -22521,8 +22521,8 @@ var require_content_disposition = __commonJS({
       this.type = type;
       this.parameters = parameters;
     }
-    function basename(path2) {
-      const normalized = path2.replaceAll("\\", "/");
+    function basename(path4) {
+      const normalized = path4.replaceAll("\\", "/");
       let end = normalized.length;
       while (end > 0 && normalized[end - 1] === "/") {
         end--;
@@ -22763,32 +22763,32 @@ var require_send = __commonJS({
     var escapeHtml = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var mime = require_mime_types();
     var ms = require_ms();
     var onFinished = require_on_finished();
     var parseRange = require_range_parser();
-    var path2 = __require("path");
+    var path4 = __require("path");
     var statuses = require_statuses();
     var Stream = __require("stream");
     var util2 = __require("util");
-    var extname = path2.extname;
-    var join = path2.join;
-    var normalize = path2.normalize;
-    var resolve = path2.resolve;
-    var sep = path2.sep;
+    var extname = path4.extname;
+    var join = path4.join;
+    var normalize = path4.normalize;
+    var resolve = path4.resolve;
+    var sep = path4.sep;
     var BYTES_RANGE_REGEXP = /^ *bytes=/;
     var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1e3;
     var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
     module.exports = send;
-    function send(req, path3, options) {
-      return new SendStream(req, path3, options);
+    function send(req, path5, options) {
+      return new SendStream(req, path5, options);
     }
-    function SendStream(req, path3, options) {
+    function SendStream(req, path5, options) {
       Stream.call(this);
       var opts = options || {};
       this.options = opts;
-      this.path = path3;
+      this.path = path5;
       this.req = req;
       this._acceptRanges = opts.acceptRanges !== void 0 ? Boolean(opts.acceptRanges) : true;
       this._cacheControl = opts.cacheControl !== void 0 ? Boolean(opts.cacheControl) : true;
@@ -22902,10 +22902,10 @@ var require_send = __commonJS({
       var lastModified = this.res.getHeader("Last-Modified");
       return parseHttpDate(lastModified) <= parseHttpDate(ifRange);
     };
-    SendStream.prototype.redirect = function redirect(path3) {
+    SendStream.prototype.redirect = function redirect(path5) {
       var res = this.res;
       if (hasListeners(this, "directory")) {
-        this.emit("directory", res, path3);
+        this.emit("directory", res, path5);
         return;
       }
       if (this.hasTrailingSlash()) {
@@ -22925,38 +22925,38 @@ var require_send = __commonJS({
     SendStream.prototype.pipe = function pipe(res) {
       var root = this._root;
       this.res = res;
-      var path3 = decode(this.path);
-      if (path3 === -1) {
+      var path5 = decode(this.path);
+      if (path5 === -1) {
         this.error(400);
         return res;
       }
-      if (~path3.indexOf("\0")) {
+      if (~path5.indexOf("\0")) {
         this.error(400);
         return res;
       }
       var parts;
       if (root !== null) {
-        if (path3) {
-          path3 = normalize("." + sep + path3);
+        if (path5) {
+          path5 = normalize("." + sep + path5);
         }
-        if (UP_PATH_REGEXP.test(path3)) {
-          debug('malicious path "%s"', path3);
+        if (UP_PATH_REGEXP.test(path5)) {
+          debug('malicious path "%s"', path5);
           this.error(403);
           return res;
         }
-        parts = path3.split(sep);
-        path3 = normalize(join(root, path3));
+        parts = path5.split(sep);
+        path5 = normalize(join(root, path5));
       } else {
-        if (UP_PATH_REGEXP.test(path3)) {
-          debug('malicious path "%s"', path3);
+        if (UP_PATH_REGEXP.test(path5)) {
+          debug('malicious path "%s"', path5);
           this.error(403);
           return res;
         }
-        parts = normalize(path3).split(sep);
-        path3 = resolve(path3);
+        parts = normalize(path5).split(sep);
+        path5 = resolve(path5);
       }
       if (containsDotFile(parts)) {
-        debug('%s dotfile "%s"', this._dotfiles, path3);
+        debug('%s dotfile "%s"', this._dotfiles, path5);
         switch (this._dotfiles) {
           case "allow":
             break;
@@ -22970,13 +22970,13 @@ var require_send = __commonJS({
         }
       }
       if (this._index.length && this.hasTrailingSlash()) {
-        this.sendIndex(path3);
+        this.sendIndex(path5);
         return res;
       }
-      this.sendFile(path3);
+      this.sendFile(path5);
       return res;
     };
-    SendStream.prototype.send = function send2(path3, stat) {
+    SendStream.prototype.send = function send2(path5, stat) {
       var len = stat.size;
       var options = this.options;
       var opts = {};
@@ -22988,9 +22988,9 @@ var require_send = __commonJS({
         this.headersAlreadySent();
         return;
       }
-      debug('pipe "%s"', path3);
-      this.setHeader(path3, stat);
-      this.type(path3);
+      debug('pipe "%s"', path5);
+      this.setHeader(path5, stat);
+      this.type(path5);
       if (this.isConditionalGET()) {
         if (this.isPreconditionFailure()) {
           this.error(412);
@@ -23039,30 +23039,30 @@ var require_send = __commonJS({
         res.end();
         return;
       }
-      this.stream(path3, opts);
+      this.stream(path5, opts);
     };
-    SendStream.prototype.sendFile = function sendFile(path3) {
+    SendStream.prototype.sendFile = function sendFile(path5) {
       var i = 0;
       var self = this;
-      debug('stat "%s"', path3);
-      fs.stat(path3, function onstat(err, stat) {
-        var pathEndsWithSep = path3[path3.length - 1] === sep;
-        if (err && err.code === "ENOENT" && !extname(path3) && !pathEndsWithSep) {
+      debug('stat "%s"', path5);
+      fs2.stat(path5, function onstat(err, stat) {
+        var pathEndsWithSep = path5[path5.length - 1] === sep;
+        if (err && err.code === "ENOENT" && !extname(path5) && !pathEndsWithSep) {
           return next(err);
         }
         if (err) return self.onStatError(err);
-        if (stat.isDirectory()) return self.redirect(path3);
+        if (stat.isDirectory()) return self.redirect(path5);
         if (pathEndsWithSep) return self.error(404);
-        self.emit("file", path3, stat);
-        self.send(path3, stat);
+        self.emit("file", path5, stat);
+        self.send(path5, stat);
       });
       function next(err) {
         if (self._extensions.length <= i) {
           return err ? self.onStatError(err) : self.error(404);
         }
-        var p = path3 + "." + self._extensions[i++];
+        var p = path5 + "." + self._extensions[i++];
         debug('stat "%s"', p);
-        fs.stat(p, function(err2, stat) {
+        fs2.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self.emit("file", p, stat);
@@ -23070,7 +23070,7 @@ var require_send = __commonJS({
         });
       }
     };
-    SendStream.prototype.sendIndex = function sendIndex(path3) {
+    SendStream.prototype.sendIndex = function sendIndex(path5) {
       var i = -1;
       var self = this;
       function next(err) {
@@ -23078,9 +23078,9 @@ var require_send = __commonJS({
           if (err) return self.onStatError(err);
           return self.error(404);
         }
-        var p = join(path3, self._index[i]);
+        var p = join(path5, self._index[i]);
         debug('stat "%s"', p);
-        fs.stat(p, function(err2, stat) {
+        fs2.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self.emit("file", p, stat);
@@ -23089,10 +23089,10 @@ var require_send = __commonJS({
       }
       next();
     };
-    SendStream.prototype.stream = function stream(path3, options) {
+    SendStream.prototype.stream = function stream(path5, options) {
       var self = this;
       var res = this.res;
-      var stream2 = fs.createReadStream(path3, options);
+      var stream2 = fs2.createReadStream(path5, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -23107,17 +23107,17 @@ var require_send = __commonJS({
         self.emit("end");
       });
     };
-    SendStream.prototype.type = function type(path3) {
+    SendStream.prototype.type = function type(path5) {
       var res = this.res;
       if (res.getHeader("Content-Type")) return;
-      var ext = extname(path3);
+      var ext = extname(path5);
       var type2 = mime.contentType(ext) || "application/octet-stream";
       debug("content-type %s", type2);
       res.setHeader("Content-Type", type2);
     };
-    SendStream.prototype.setHeader = function setHeader(path3, stat) {
+    SendStream.prototype.setHeader = function setHeader(path5, stat) {
       var res = this.res;
-      this.emit("headers", res, path3, stat);
+      this.emit("headers", res, path5, stat);
       if (this._acceptRanges && !res.getHeader("Accept-Ranges")) {
         debug("accept ranges");
         res.setHeader("Accept-Ranges", "bytes");
@@ -23175,9 +23175,9 @@ var require_send = __commonJS({
       }
       return err instanceof Error ? createError(status, err, { expose: false }) : createError(status, err);
     }
-    function decode(path3) {
+    function decode(path5) {
       try {
-        return decodeURIComponent(path3);
+        return decodeURIComponent(path5);
       } catch (err) {
         return -1;
       }
@@ -23321,7 +23321,7 @@ var require_response = __commonJS({
     var http = __require("node:http");
     var onFinished = require_on_finished();
     var mime = require_mime_types();
-    var path2 = __require("node:path");
+    var path4 = __require("node:path");
     var pathIsAbsolute = __require("node:path").isAbsolute;
     var statuses = require_statuses();
     var sign = require_cookie_signature().sign;
@@ -23330,8 +23330,8 @@ var require_response = __commonJS({
     var setCharset = require_utils3().setCharset;
     var cookie = require_cookie();
     var send = require_send();
-    var extname = path2.extname;
-    var resolve = path2.resolve;
+    var extname = path4.extname;
+    var resolve = path4.resolve;
     var vary = require_vary();
     var { Buffer: Buffer2 } = __require("node:buffer");
     var res = Object.create(http.ServerResponse.prototype);
@@ -23477,26 +23477,26 @@ var require_response = __commonJS({
       this.type("txt");
       return this.send(body);
     };
-    res.sendFile = function sendFile(path3, options, callback) {
+    res.sendFile = function sendFile(path5, options, callback) {
       var done = callback;
       var req = this.req;
       var res2 = this;
       var next = req.next;
       var opts = options || {};
-      if (!path3) {
+      if (!path5) {
         throw new TypeError("path argument is required to res.sendFile");
       }
-      if (typeof path3 !== "string") {
+      if (typeof path5 !== "string") {
         throw new TypeError("path must be a string to res.sendFile");
       }
       if (typeof options === "function") {
         done = options;
         opts = {};
       }
-      if (!opts.root && !pathIsAbsolute(path3)) {
+      if (!opts.root && !pathIsAbsolute(path5)) {
         throw new TypeError("path must be absolute or specify root to res.sendFile");
       }
-      var pathname = encodeURI(path3);
+      var pathname = encodeURI(path5);
       opts.etag = this.app.enabled("etag");
       var file = send(req, pathname, opts);
       sendfile(res2, file, opts, function(err) {
@@ -23507,7 +23507,7 @@ var require_response = __commonJS({
         }
       });
     };
-    res.download = function download(path3, filename, options, callback) {
+    res.download = function download(path5, filename, options, callback) {
       var done = callback;
       var name = filename;
       var opts = options || null;
@@ -23524,7 +23524,7 @@ var require_response = __commonJS({
         opts = filename;
       }
       var headers = {
-        "Content-Disposition": contentDisposition(name || path3)
+        "Content-Disposition": contentDisposition(name || path5)
       };
       if (opts && opts.headers) {
         var keys = Object.keys(opts.headers);
@@ -23537,7 +23537,7 @@ var require_response = __commonJS({
       }
       opts = Object.create(opts);
       opts.headers = headers;
-      var fullPath = !opts.root ? resolve(path3) : path3;
+      var fullPath = !opts.root ? resolve(path5) : path5;
       return this.sendFile(fullPath, opts, done);
     };
     res.contentType = res.type = function contentType(type) {
@@ -23820,11 +23820,11 @@ var require_serve_static = __commonJS({
         }
         var forwardError = !fallthrough;
         var originalUrl = parseUrl.original(req);
-        var path2 = parseUrl(req).pathname;
-        if (path2 === "/" && originalUrl.pathname.substr(-1) !== "/") {
-          path2 = "";
+        var path4 = parseUrl(req).pathname;
+        if (path4 === "/" && originalUrl.pathname.substr(-1) !== "/") {
+          path4 = "";
         }
-        var stream = send(req, path2, opts);
+        var stream = send(req, path4, opts);
         stream.on("directory", onDirectory);
         if (setHeaders) {
           stream.on("headers", setHeaders);
@@ -24472,8 +24472,8 @@ var require_req = __commonJS({
       if (req.originalUrl) {
         _req.url = req.originalUrl;
       } else {
-        const path2 = req.path;
-        _req.url = typeof path2 === "string" ? path2 : req.url ? req.url.path || req.url : void 0;
+        const path4 = req.path;
+        _req.url = typeof path4 === "string" ? path4 : req.url ? req.url.path || req.url : void 0;
       }
       if (req.query) {
         _req.query = req.query;
@@ -24638,14 +24638,14 @@ var require_redact = __commonJS({
       }
       return obj;
     }
-    function parsePath(path2) {
+    function parsePath(path4) {
       const parts = [];
       let current = "";
       let inBrackets = false;
       let inQuotes = false;
       let quoteChar = "";
-      for (let i = 0; i < path2.length; i++) {
-        const char2 = path2[i];
+      for (let i = 0; i < path4.length; i++) {
+        const char2 = path4[i];
         if (!inBrackets && char2 === ".") {
           if (current) {
             parts.push(current);
@@ -24776,10 +24776,10 @@ var require_redact = __commonJS({
       return current;
     }
     function redactPaths(obj, paths, censor, remove = false) {
-      for (const path2 of paths) {
-        const parts = parsePath(path2);
+      for (const path4 of paths) {
+        const parts = parsePath(path4);
         if (parts.includes("*")) {
-          redactWildcardPath(obj, parts, censor, path2, remove);
+          redactWildcardPath(obj, parts, censor, path4, remove);
         } else {
           if (remove) {
             removeKey(obj, parts);
@@ -24864,8 +24864,8 @@ var require_redact = __commonJS({
           }
         } else {
           if (afterWildcard.includes("*")) {
-            const wrappedCensor = typeof censor === "function" ? (value, path2) => {
-              const fullPath = [...pathArray.slice(0, pathLength), ...path2];
+            const wrappedCensor = typeof censor === "function" ? (value, path4) => {
+              const fullPath = [...pathArray.slice(0, pathLength), ...path4];
               return censor(value, fullPath);
             } : censor;
             redactWildcardPath(current, afterWildcard, wrappedCensor, originalPath, remove);
@@ -24900,8 +24900,8 @@ var require_redact = __commonJS({
         return null;
       }
       const pathStructure = /* @__PURE__ */ new Map();
-      for (const path2 of pathsToClone) {
-        const parts = parsePath(path2);
+      for (const path4 of pathsToClone) {
+        const parts = parsePath(path4);
         let current = pathStructure;
         for (let i = 0; i < parts.length; i++) {
           const part = parts[i];
@@ -24953,24 +24953,24 @@ var require_redact = __commonJS({
       }
       return cloneSelectively(obj, pathStructure);
     }
-    function validatePath(path2) {
-      if (typeof path2 !== "string") {
+    function validatePath(path4) {
+      if (typeof path4 !== "string") {
         throw new Error("Paths must be (non-empty) strings");
       }
-      if (path2 === "") {
+      if (path4 === "") {
         throw new Error("Invalid redaction path ()");
       }
-      if (path2.includes("..")) {
-        throw new Error(`Invalid redaction path (${path2})`);
+      if (path4.includes("..")) {
+        throw new Error(`Invalid redaction path (${path4})`);
       }
-      if (path2.includes(",")) {
-        throw new Error(`Invalid redaction path (${path2})`);
+      if (path4.includes(",")) {
+        throw new Error(`Invalid redaction path (${path4})`);
       }
       let bracketCount = 0;
       let inQuotes = false;
       let quoteChar = "";
-      for (let i = 0; i < path2.length; i++) {
-        const char2 = path2[i];
+      for (let i = 0; i < path4.length; i++) {
+        const char2 = path4[i];
         if ((char2 === '"' || char2 === "'") && bracketCount > 0) {
           if (!inQuotes) {
             inQuotes = true;
@@ -24984,20 +24984,20 @@ var require_redact = __commonJS({
         } else if (char2 === "]" && !inQuotes) {
           bracketCount--;
           if (bracketCount < 0) {
-            throw new Error(`Invalid redaction path (${path2})`);
+            throw new Error(`Invalid redaction path (${path4})`);
           }
         }
       }
       if (bracketCount !== 0) {
-        throw new Error(`Invalid redaction path (${path2})`);
+        throw new Error(`Invalid redaction path (${path4})`);
       }
     }
     function validatePaths(paths) {
       if (!Array.isArray(paths)) {
         throw new TypeError("paths must be an array");
       }
-      for (const path2 of paths) {
-        validatePath(path2);
+      for (const path4 of paths) {
+        validatePath(path4);
       }
     }
     function slowRedact(options = {}) {
@@ -25165,8 +25165,8 @@ var require_redaction = __commonJS({
         if (shape[k] === null) {
           o[k] = (value) => topCensor(value, [k]);
         } else {
-          const wrappedCensor = typeof censor === "function" ? (value, path2) => {
-            return censor(value, [k, ...path2]);
+          const wrappedCensor = typeof censor === "function" ? (value, path4) => {
+            return censor(value, [k, ...path4]);
           } : censor;
           o[k] = Redact({
             paths: shape[k],
@@ -25384,10 +25384,10 @@ var require_atomic_sleep = __commonJS({
 var require_sonic_boom = __commonJS({
   "../node_modules/.pnpm/sonic-boom@4.2.1/node_modules/sonic-boom/index.js"(exports, module) {
     "use strict";
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var EventEmitter = __require("events");
     var inherits = __require("util").inherits;
-    var path2 = __require("path");
+    var path4 = __require("path");
     var sleep = require_atomic_sleep();
     var assert = __require("assert");
     var BUSY_WRITE_TIMEOUT = 100;
@@ -25441,20 +25441,20 @@ var require_sonic_boom = __commonJS({
       const mode = sonic.mode;
       if (sonic.sync) {
         try {
-          if (sonic.mkdir) fs.mkdirSync(path2.dirname(file), { recursive: true });
-          const fd = fs.openSync(file, flags, mode);
+          if (sonic.mkdir) fs2.mkdirSync(path4.dirname(file), { recursive: true });
+          const fd = fs2.openSync(file, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs.mkdir(path2.dirname(file), { recursive: true }, (err) => {
+        fs2.mkdir(path4.dirname(file), { recursive: true }, (err) => {
           if (err) return fileOpened(err);
-          fs.open(file, flags, mode, fileOpened);
+          fs2.open(file, flags, mode, fileOpened);
         });
       } else {
-        fs.open(file, flags, mode, fileOpened);
+        fs2.open(file, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -25495,8 +25495,8 @@ var require_sonic_boom = __commonJS({
         this.flush = flushBuffer;
         this.flushSync = flushBufferSync;
         this._actualWrite = actualWriteBuffer;
-        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf);
-        fsWrite = () => fs.write(this.fd, this._writingBuf, this.release);
+        fsWriteSync = () => fs2.writeSync(this.fd, this._writingBuf);
+        fsWrite = () => fs2.write(this.fd, this._writingBuf, this.release);
       } else if (contentMode === void 0 || contentMode === kContentModeUtf8) {
         this._writingBuf = "";
         this.write = write;
@@ -25505,15 +25505,15 @@ var require_sonic_boom = __commonJS({
         this._actualWrite = actualWrite;
         fsWriteSync = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs.writeSync(this.fd, this._writingBuf);
+            return fs2.writeSync(this.fd, this._writingBuf);
           }
-          return fs.writeSync(this.fd, this._writingBuf, "utf8");
+          return fs2.writeSync(this.fd, this._writingBuf, "utf8");
         };
         fsWrite = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs.write(this.fd, this._writingBuf, this.release);
+            return fs2.write(this.fd, this._writingBuf, this.release);
           }
-          return fs.write(this.fd, this._writingBuf, "utf8", this.release);
+          return fs2.write(this.fd, this._writingBuf, "utf8", this.release);
         };
       } else {
         throw new Error(`SonicBoom supports "${kContentModeUtf8}" and "${kContentModeBuffer}", but passed ${contentMode}`);
@@ -25570,7 +25570,7 @@ var require_sonic_boom = __commonJS({
           }
         }
         if (this._fsync) {
-          fs.fsyncSync(this.fd);
+          fs2.fsyncSync(this.fd);
         }
         const len = this._len;
         if (this._reopening) {
@@ -25684,7 +25684,7 @@ var require_sonic_boom = __commonJS({
       const onDrain = () => {
         if (!this._fsync) {
           try {
-            fs.fsync(this.fd, (err) => {
+            fs2.fsync(this.fd, (err) => {
               this._flushPending = false;
               cb(err);
             });
@@ -25786,7 +25786,7 @@ var require_sonic_boom = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs.close(fd, (err) => {
+          fs2.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -25835,7 +25835,7 @@ var require_sonic_boom = __commonJS({
           buf = this._bufs[0];
         }
         try {
-          const n = Buffer.isBuffer(buf) ? fs.writeSync(this.fd, buf) : fs.writeSync(this.fd, buf, "utf8");
+          const n = Buffer.isBuffer(buf) ? fs2.writeSync(this.fd, buf) : fs2.writeSync(this.fd, buf, "utf8");
           const releasedBufObj = releaseWritingBuf(buf, this._len, n);
           buf = releasedBufObj.writingBuf;
           this._len = releasedBufObj.len;
@@ -25851,7 +25851,7 @@ var require_sonic_boom = __commonJS({
         }
       }
       try {
-        fs.fsyncSync(this.fd);
+        fs2.fsyncSync(this.fd);
       } catch {
       }
     }
@@ -25872,7 +25872,7 @@ var require_sonic_boom = __commonJS({
           buf = mergeBuf(this._bufs[0], this._lens[0]);
         }
         try {
-          const n = fs.writeSync(this.fd, buf);
+          const n = fs2.writeSync(this.fd, buf);
           buf = buf.subarray(n);
           this._len = Math.max(this._len - n, 0);
           if (buf.length <= 0) {
@@ -25900,13 +25900,13 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : this._bufs.shift() || "";
       if (this.sync) {
         try {
-          const written = Buffer.isBuffer(this._writingBuf) ? fs.writeSync(this.fd, this._writingBuf) : fs.writeSync(this.fd, this._writingBuf, "utf8");
+          const written = Buffer.isBuffer(this._writingBuf) ? fs2.writeSync(this.fd, this._writingBuf) : fs2.writeSync(this.fd, this._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs.write(this.fd, this._writingBuf, release);
+        fs2.write(this.fd, this._writingBuf, release);
       }
     }
     function actualWriteBuffer() {
@@ -25915,7 +25915,7 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : mergeBuf(this._bufs.shift(), this._lens.shift());
       if (this.sync) {
         try {
-          const written = fs.writeSync(this.fd, this._writingBuf);
+          const written = fs2.writeSync(this.fd, this._writingBuf);
           release(null, written);
         } catch (err) {
           release(err);
@@ -25924,7 +25924,7 @@ var require_sonic_boom = __commonJS({
         if (kCopyBuffer) {
           this._writingBuf = Buffer.from(this._writingBuf);
         }
-        fs.write(this.fd, this._writingBuf, release);
+        fs2.write(this.fd, this._writingBuf, release);
       }
     }
     function actualClose(sonic) {
@@ -25940,12 +25940,12 @@ var require_sonic_boom = __commonJS({
       sonic._lens = [];
       assert(typeof sonic.fd === "number", `sonic.fd must be a number, got ${typeof sonic.fd}`);
       try {
-        fs.fsync(sonic.fd, closeWrapped);
+        fs2.fsync(sonic.fd, closeWrapped);
       } catch {
       }
       function closeWrapped() {
         if (sonic.fd !== 1 && sonic.fd !== 2) {
-          fs.close(sonic.fd, done);
+          fs2.close(sonic.fd, done);
         } else {
           done();
         }
@@ -28309,9 +28309,9 @@ var require_pino = __commonJS({
   "../node_modules/.pnpm/pino@9.14.0/node_modules/pino/pino.js"(exports, module) {
     function pinoBundlerAbsolutePath(p) {
       try {
-        const path2 = __require("path");
-        const outputDir = "D:\\prog\\kuvote\\backend\\dist";
-        return path2.resolve(outputDir, p.replace(/^\.\//, ""));
+        const path4 = __require("path");
+        const outputDir = "/home/runner/workspace/backend/dist";
+        return path4.resolve(outputDir, p.replace(/^\.\//, ""));
       } catch (e) {
         const f = new Function("p", "return new URL(p, import.meta.url).pathname");
         return f(p);
@@ -29184,8 +29184,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path2, errorMaps, issueData } = params;
-      const fullPath = [...path2, ...issueData.path || []];
+      const { data, path: path4, errorMaps, issueData } = params;
+      const fullPath = [...path4, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -29493,11 +29493,11 @@ var init_types = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path2, key) {
+      constructor(parent, value, path4, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path2;
+        this._path = path4;
         this._key = key;
       }
       get path() {
@@ -34546,15 +34546,15 @@ var require_pg_connection_string = __commonJS({
       if (config.sslcert || config.sslkey || config.sslrootcert || config.sslmode) {
         config.ssl = {};
       }
-      const fs = config.sslcert || config.sslkey || config.sslrootcert ? __require("fs") : null;
+      const fs2 = config.sslcert || config.sslkey || config.sslrootcert ? __require("fs") : null;
       if (config.sslcert) {
-        config.ssl.cert = fs.readFileSync(config.sslcert).toString();
+        config.ssl.cert = fs2.readFileSync(config.sslcert).toString();
       }
       if (config.sslkey) {
-        config.ssl.key = fs.readFileSync(config.sslkey).toString();
+        config.ssl.key = fs2.readFileSync(config.sslkey).toString();
       }
       if (config.sslrootcert) {
-        config.ssl.ca = fs.readFileSync(config.sslrootcert).toString();
+        config.ssl.ca = fs2.readFileSync(config.sslrootcert).toString();
       }
       if (options.useLibpqCompat && config.uselibpqcompat) {
         throw new Error("Both useLibpqCompat and uselibpqcompat are set. Please use only one of them.");
@@ -36319,7 +36319,7 @@ var require_split2 = __commonJS({
 var require_helper = __commonJS({
   "../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/helper.js"(exports, module) {
     "use strict";
-    var path2 = __require("path");
+    var path4 = __require("path");
     var Stream = __require("stream").Stream;
     var split = require_split2();
     var util2 = __require("util");
@@ -36358,7 +36358,7 @@ var require_helper = __commonJS({
     };
     module.exports.getFileName = function(rawEnv) {
       var env = rawEnv || process.env;
-      var file = env.PGPASSFILE || (isWin ? path2.join(env.APPDATA || "./", "postgresql", "pgpass.conf") : path2.join(env.HOME || "./", ".pgpass"));
+      var file = env.PGPASSFILE || (isWin ? path4.join(env.APPDATA || "./", "postgresql", "pgpass.conf") : path4.join(env.HOME || "./", ".pgpass"));
       return file;
     };
     module.exports.usePgPass = function(stats, fname) {
@@ -36490,16 +36490,16 @@ var require_helper = __commonJS({
 var require_lib4 = __commonJS({
   "../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/index.js"(exports, module) {
     "use strict";
-    var path2 = __require("path");
-    var fs = __require("fs");
+    var path4 = __require("path");
+    var fs2 = __require("fs");
     var helper = require_helper();
     module.exports = function(connInfo, cb) {
       var file = helper.getFileName();
-      fs.stat(file, function(err, stat) {
+      fs2.stat(file, function(err, stat) {
         if (err || !helper.usePgPass(stat, file)) {
           return cb(void 0);
         }
-        var st = fs.createReadStream(file);
+        var st = fs2.createReadStream(file);
         helper.getPassword(connInfo, st, cb);
       });
     };
@@ -39506,7 +39506,7 @@ var init_selection_proxy = __esm({
 function mapResultRow(columns, row, joinsNotNullableMap) {
   const nullifyMap = {};
   const result = columns.reduce(
-    (result2, { path: path2, field }, columnIndex) => {
+    (result2, { path: path4, field }, columnIndex) => {
       let decoder;
       if (is(field, Column)) {
         decoder = field;
@@ -39516,8 +39516,8 @@ function mapResultRow(columns, row, joinsNotNullableMap) {
         decoder = field.sql.decoder;
       }
       let node = result2;
-      for (const [pathChunkIndex, pathChunk] of path2.entries()) {
-        if (pathChunkIndex < path2.length - 1) {
+      for (const [pathChunkIndex, pathChunk] of path4.entries()) {
+        if (pathChunkIndex < path4.length - 1) {
           if (!(pathChunk in node)) {
             node[pathChunk] = {};
           }
@@ -39525,8 +39525,8 @@ function mapResultRow(columns, row, joinsNotNullableMap) {
         } else {
           const rawValue = row[columnIndex];
           const value = node[pathChunk] = rawValue === null ? null : decoder.mapFromDriverValue(rawValue);
-          if (joinsNotNullableMap && is(field, Column) && path2.length === 2) {
-            const objectName = path2[0];
+          if (joinsNotNullableMap && is(field, Column) && path4.length === 2) {
+            const objectName = path4[0];
             if (!(objectName in nullifyMap)) {
               nullifyMap[objectName] = value === null ? getTableName(field.table) : false;
             } else if (typeof nullifyMap[objectName] === "string" && nullifyMap[objectName] !== getTableName(field.table)) {
@@ -46064,7 +46064,7 @@ var init_node_postgres = __esm({
 });
 
 // ../packages/db/src/index.ts
-var Pool3, DATABASE_URL, pool, db, usersTable, otpsTable, schoolsTable, departmentsTable, coursesTable, hostelsTable, pollsTable, pollSeatsTable, candidatesTable, endorsementsTable, ballotTokensTable, votesTable, auditLogTable;
+var Pool3, DATABASE_URL, pool, db, usersTable, otpsTable, schoolsTable, departmentsTable, coursesTable, hostelsTable, pollsTable, pollSeatsTable, candidatesTable, candidateDocumentsTable, electionApplicationSettingsTable, endorsementsTable, ballotTokensTable, votesTable, auditLogTable;
 var init_src2 = __esm({
   "../packages/db/src/index.ts"() {
     "use strict";
@@ -46091,7 +46091,7 @@ var init_src2 = __esm({
       registrationNumber: varchar("registration_number", { length: 50 }),
       registrationExpiresAt: timestamp("registration_expires_at"),
       feeStatus: varchar("fee_status", { length: 20 }),
-      createdAt: timestamp("created_at").defaultNow().notNull()
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
     });
     otpsTable = pgTable("otps", {
       id: uuid("id").defaultRandom().primaryKey(),
@@ -46126,11 +46126,12 @@ var init_src2 = __esm({
       id: uuid("id").defaultRandom().primaryKey(),
       title: varchar("title", { length: 255 }).notNull(),
       description: text("description").notNull().default(""),
+      pollType: varchar("poll_type", { length: 20 }).notNull().default("general"),
       startDate: timestamp("start_date").notNull(),
       endDate: timestamp("end_date").notNull(),
       locked: boolean("locked").notNull().default(false),
       createdBy: uuid("created_by").notNull(),
-      createdAt: timestamp("created_at").defaultNow().notNull()
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
     });
     pollSeatsTable = pgTable("poll_seats", {
       id: uuid("id").defaultRandom().primaryKey(),
@@ -46148,10 +46149,33 @@ var init_src2 = __esm({
       seatId: uuid("seat_id").notNull(),
       userId: uuid("user_id").notNull(),
       manifesto: text("manifesto").notNull(),
+      slogan: varchar("slogan", { length: 255 }),
+      bio: text("bio"),
       photoUrl: text("photo_url"),
       status: varchar("status", { length: 50 }).notNull().default("pending"),
       rejectionReason: text("rejection_reason"),
-      createdAt: timestamp("created_at").defaultNow().notNull()
+      reviewedBy: uuid("reviewed_by"),
+      reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+    });
+    candidateDocumentsTable = pgTable("candidate_documents", {
+      id: uuid("id").defaultRandom().primaryKey(),
+      candidateId: uuid("candidate_id").notNull(),
+      documentName: varchar("document_name", { length: 255 }).notNull(),
+      documentUrl: text("document_url").notNull(),
+      documentType: varchar("document_type", { length: 100 }).notNull().default("document"),
+      uploadedAt: timestamp("uploaded_at", { withTimezone: true }).defaultNow().notNull()
+    });
+    electionApplicationSettingsTable = pgTable("election_application_settings", {
+      id: uuid("id").defaultRandom().primaryKey(),
+      pollId: uuid("poll_id").notNull().unique(),
+      isOpen: boolean("is_open").notNull().default(false),
+      openAt: timestamp("open_at", { withTimezone: true }),
+      closeAt: timestamp("close_at", { withTimezone: true }),
+      timerDurationMinutes: integer("timer_duration_minutes"),
+      openedBy: uuid("opened_by"),
+      closedBy: uuid("closed_by"),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
     });
     endorsementsTable = pgTable("endorsements", {
       id: uuid("id").defaultRandom().primaryKey(),
@@ -46166,7 +46190,7 @@ var init_src2 = __esm({
       userId: uuid("user_id").notNull(),
       tokenHash: text("token_hash").notNull(),
       used: boolean("used").notNull().default(false),
-      usedAt: timestamp("used_at")
+      usedAt: timestamp("used_at", { withTimezone: true })
     });
     votesTable = pgTable("votes", {
       id: uuid("id").defaultRandom().primaryKey(),
@@ -46175,7 +46199,8 @@ var init_src2 = __esm({
       candidateId: uuid("candidate_id").notNull(),
       encryptedPayload: text("encrypted_payload").notNull(),
       ballotHash: text("ballot_hash").notNull(),
-      tokenHash: text("token_hash").notNull()
+      tokenHash: text("token_hash").notNull(),
+      votedAt: timestamp("voted_at", { withTimezone: true }).defaultNow().notNull()
     });
     auditLogTable = pgTable("audit_log", {
       id: uuid("id").defaultRandom().primaryKey(),
@@ -46184,7 +46209,8 @@ var init_src2 = __esm({
       actorRole: varchar("actor_role", { length: 50 }),
       target: varchar("target", { length: 255 }),
       details: text("details"),
-      createdAt: timestamp("created_at").defaultNow().notNull()
+      ipAddress: varchar("ip_address", { length: 45 }),
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
     });
   }
 });
@@ -47092,7 +47118,8 @@ async function audit(entry) {
       actorEmail: entry.actorEmail ?? null,
       actorRole: entry.actorRole ?? null,
       target: entry.target ?? null,
-      details: entry.details ?? null
+      details: entry.details ?? null,
+      ipAddress: entry.ipAddress ?? null
     });
   } catch (err) {
     logger.warn({ err }, "Failed to write audit log entry");
@@ -47107,10 +47134,10 @@ var init_audit = __esm({
 });
 
 // src/controllers/auth.controller.ts
-function extractRegistrationNumber(email) {
-  const match = email.match(/^(\d{1,6})\.{1,2}(\d{4})@/);
+function suggestEmailFromRegNumber(regNo) {
+  const match = regNo.match(/^[A-Z]{1,2}\d+\/(\d+)\/(\d{4})$/);
   if (!match) return null;
-  return `${match[1]}/${match[2]}`;
+  return `${match[1]}.${match[2]}@students.ku.ac.ke`;
 }
 function addMonths(date2, months) {
   const d = new Date(date2);
@@ -47145,15 +47172,22 @@ async function consumeOtp(email, code, purpose) {
   return true;
 }
 async function prefillRegistration(req, res) {
-  const email = (req.query.email ?? "").trim().toLowerCase();
-  if (!email) {
-    res.status(400).json({ message: "email query parameter is required" });
+  const emailParam = (req.query.email ?? "").trim().toLowerCase();
+  const regNumberParam = (req.query.regNumber ?? "").trim().toUpperCase();
+  let lookupEmail = emailParam;
+  if (regNumberParam && REG_NUMBER_REGEX.test(regNumberParam)) {
+    const derived = suggestEmailFromRegNumber(regNumberParam);
+    if (derived) lookupEmail = derived;
+  }
+  if (!lookupEmail) {
+    res.status(400).json({ message: "email or regNumber query parameter is required" });
     return;
   }
-  const rows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  const rows = await db.select().from(usersTable).where(eq(usersTable.email, lookupEmail)).limit(1);
   const user = rows[0];
   if (!user) {
-    res.json({ exists: false, feeCleared: true });
+    const suggestedEmail = regNumberParam ? suggestEmailFromRegNumber(regNumberParam) : null;
+    res.json({ exists: false, feeCleared: true, suggestedEmail });
     return;
   }
   const feeCleared = user.feeStatus === "cleared";
@@ -47165,17 +47199,23 @@ async function prefillRegistration(req, res) {
     gender: user.gender,
     courseId: user.courseId,
     hostelId: user.hostelId,
-    alreadyActive: user.status === "active"
+    alreadyActive: user.status === "active",
+    suggestedEmail: lookupEmail,
+    registrationNumber: user.registrationNumber
   });
 }
 async function register(req, res) {
-  const { name, email, password, gender, courseId, hostelId } = req.body ?? {};
+  const { name, email, password, gender, courseId, hostelId, registrationNumber } = req.body ?? {};
   if (!name || !email || !password || !gender || !courseId) {
     res.status(400).json({ message: "Name, email, password, gender and course are required" });
     return;
   }
   if (!EMAIL_REGEX.test(email)) {
     res.status(400).json({ message: "Email must be in the form 12345.1234@students.ku.ac.ke" });
+    return;
+  }
+  if (registrationNumber && !REG_NUMBER_REGEX.test(registrationNumber)) {
+    res.status(400).json({ message: "Registration number must be in the format J31/4338/2022 or J31S/4338/2022" });
     return;
   }
   if (password.length < 8) {
@@ -47198,7 +47238,9 @@ async function register(req, res) {
     });
     return;
   }
-  const regNo = extractRegistrationNumber(email);
+  const emailMatch = email.match(/^(\d{1,6})\.{1,2}(\d{4})@/);
+  const derivedRegNo = registrationNumber ?? (emailMatch ? null : null);
+  const finalRegNo = registrationNumber ?? (emailMatch ? null : null);
   const expiresAt = addMonths(/* @__PURE__ */ new Date(), REGISTRATION_VALID_MONTHS);
   if (existing[0]) {
     await db.update(usersTable).set({
@@ -47206,8 +47248,8 @@ async function register(req, res) {
       passwordHash: hashPassword(password),
       gender,
       courseId,
-      hostelId,
-      registrationNumber: regNo,
+      hostelId: hostelId ?? null,
+      registrationNumber: finalRegNo ?? existing[0].registrationNumber,
       registrationExpiresAt: expiresAt
     }).where(eq(usersTable.id, existing[0].id));
   } else {
@@ -47219,8 +47261,8 @@ async function register(req, res) {
       status: "pending_otp",
       gender,
       courseId,
-      hostelId,
-      registrationNumber: regNo,
+      hostelId: hostelId ?? null,
+      registrationNumber: finalRegNo ?? null,
       registrationExpiresAt: expiresAt
     });
   }
@@ -47271,9 +47313,16 @@ async function login(req, res) {
     res.status(400).json({ message: "identifier and password are required" });
     return;
   }
-  const isEmail = identifier.includes("@");
+  let lookupEmail = identifier;
+  if (!identifier.includes("@")) {
+    if (REG_NUMBER_REGEX.test(identifier.toUpperCase())) {
+      const derived = suggestEmailFromRegNumber(identifier.toUpperCase());
+      if (derived) lookupEmail = derived;
+    }
+  }
+  const isEmail = lookupEmail.includes("@");
   const userRows = await db.select().from(usersTable).where(
-    isEmail ? eq(usersTable.email, identifier) : eq(usersTable.registrationNumber, identifier)
+    isEmail ? eq(usersTable.email, lookupEmail) : eq(usersTable.registrationNumber, identifier)
   ).limit(1);
   const user = userRows[0];
   if (!user || user.role !== "student") {
@@ -47360,7 +47409,7 @@ async function getMe(req, res) {
   const profile = await loadUserProfile(req.user.id);
   res.json({ user: profile });
 }
-var EMAIL_REGEX, OTP_TTL_MS, REGISTRATION_VALID_MONTHS;
+var REG_NUMBER_REGEX, EMAIL_REGEX, OTP_TTL_MS, REGISTRATION_VALID_MONTHS;
 var init_auth_controller = __esm({
   "src/controllers/auth.controller.ts"() {
     "use strict";
@@ -47369,6 +47418,7 @@ var init_auth_controller = __esm({
     init_auth();
     init_email();
     init_audit();
+    REG_NUMBER_REGEX = /^[A-Z]{1,2}\d+\/\d+\/\d{4}$/;
     EMAIL_REGEX = /^\d{1,6}\.{1,2}\d{4}@students\.ku\.ac\.ke$/;
     OTP_TTL_MS = 10 * 60 * 1e3;
     REGISTRATION_VALID_MONTHS = 11;
@@ -47832,8 +47882,10 @@ var init_polls = __esm({
 });
 
 // src/controllers/candidates.controller.ts
+import path from "node:path";
+import fs from "node:fs";
 async function applyCandidate(req, res) {
-  const { pollId, seatId, manifesto } = req.body ?? {};
+  const { pollId, seatId, manifesto, slogan, bio } = req.body ?? {};
   if (!pollId || !seatId || !manifesto) {
     res.status(400).json({ message: "pollId, seatId and manifesto are required" });
     return;
@@ -47844,8 +47896,15 @@ async function applyCandidate(req, res) {
     res.status(404).json({ message: "Poll not found" });
     return;
   }
-  if (poll.locked) {
-    res.status(400).json({ message: "Candidate window is closed for this poll" });
+  const appSettings = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId)).limit(1);
+  const settings = appSettings[0];
+  if (!settings || !settings.isOpen) {
+    res.status(400).json({ message: "The application window for this poll is currently closed. Please wait until the admin opens it." });
+    return;
+  }
+  if (settings.closeAt && /* @__PURE__ */ new Date() > settings.closeAt) {
+    await db.update(electionApplicationSettingsTable).set({ isOpen: false }).where(eq(electionApplicationSettingsTable.pollId, pollId));
+    res.status(400).json({ message: "The application window has expired." });
     return;
   }
   const seatRows = await db.select().from(pollSeatsTable).where(and(eq(pollSeatsTable.id, seatId), eq(pollSeatsTable.pollId, pollId))).limit(1);
@@ -47858,7 +47917,7 @@ async function applyCandidate(req, res) {
     res.status(409).json({ message: "You have already applied for this seat" });
     return;
   }
-  const inserted = await db.insert(candidatesTable).values({ pollId, seatId, userId: req.user.id, manifesto, status: "pending" }).returning();
+  const inserted = await db.insert(candidatesTable).values({ pollId, seatId, userId: req.user.id, manifesto, slogan: slogan ?? null, bio: bio ?? null, status: "pending" }).returning();
   await audit({
     action: "candidate.apply",
     actorEmail: req.user.email,
@@ -47866,6 +47925,39 @@ async function applyCandidate(req, res) {
     target: seatId
   });
   res.status(201).json({ id: inserted[0].id, message: "Application submitted" });
+}
+async function uploadCandidateDocument(req, res) {
+  const { candidateId } = req.params;
+  const { documentName, documentType, fileData, fileName } = req.body ?? {};
+  if (!documentName || !fileData || !fileName) {
+    res.status(400).json({ message: "documentName, fileData and fileName are required" });
+    return;
+  }
+  const candRows = await db.select().from(candidatesTable).where(and(eq(candidatesTable.id, candidateId), eq(candidatesTable.userId, req.user.id))).limit(1);
+  if (!candRows[0]) {
+    res.status(404).json({ message: "Candidate application not found" });
+    return;
+  }
+  const ext = path.extname(fileName).toLowerCase();
+  const safeFileName = `${candidateId}_${Date.now()}${ext}`;
+  const filePath = path.join(UPLOADS_DIR, safeFileName);
+  const base64Data = fileData.replace(/^data:[^;]+;base64,/, "");
+  fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+  const documentUrl = `/api/uploads/${safeFileName}`;
+  const inserted = await db.insert(candidateDocumentsTable).values({
+    candidateId,
+    documentName,
+    documentUrl,
+    documentType: documentType ?? "document"
+  }).returning();
+  await audit({
+    action: "candidate.upload_document",
+    actorEmail: req.user.email,
+    actorRole: "student",
+    target: candidateId,
+    details: documentName
+  });
+  res.status(201).json({ id: inserted[0].id, documentUrl, message: "Document uploaded" });
 }
 async function getMyApplications(req, res) {
   const rows = await db.select({
@@ -47875,23 +47967,40 @@ async function getMyApplications(req, res) {
     seatId: candidatesTable.seatId,
     seatLabel: pollSeatsTable.label,
     manifesto: candidatesTable.manifesto,
+    slogan: candidatesTable.slogan,
+    bio: candidatesTable.bio,
+    photoUrl: candidatesTable.photoUrl,
     status: candidatesTable.status,
     rejectionReason: candidatesTable.rejectionReason,
     createdAt: candidatesTable.createdAt
   }).from(candidatesTable).leftJoin(pollsTable, eq(candidatesTable.pollId, pollsTable.id)).leftJoin(pollSeatsTable, eq(candidatesTable.seatId, pollSeatsTable.id)).where(eq(candidatesTable.userId, req.user.id)).orderBy(desc(candidatesTable.createdAt));
-  res.json(
-    rows.map((r) => ({
-      id: r.id,
-      pollId: r.pollId,
-      pollTitle: r.pollTitle ?? "",
-      seatId: r.seatId,
-      seatLabel: r.seatLabel ?? "",
-      manifesto: r.manifesto,
-      status: r.status,
-      rejectionReason: r.rejectionReason ?? null,
-      createdAt: r.createdAt.toISOString()
-    }))
+  const withDocs = await Promise.all(
+    rows.map(async (r) => {
+      const docs = await db.select().from(candidateDocumentsTable).where(eq(candidateDocumentsTable.candidateId, r.id));
+      return {
+        id: r.id,
+        pollId: r.pollId,
+        pollTitle: r.pollTitle ?? "",
+        seatId: r.seatId,
+        seatLabel: r.seatLabel ?? "",
+        manifesto: r.manifesto,
+        slogan: r.slogan ?? null,
+        bio: r.bio ?? null,
+        photoUrl: r.photoUrl ?? null,
+        status: r.status,
+        rejectionReason: r.rejectionReason ?? null,
+        createdAt: r.createdAt.toISOString(),
+        documents: docs.map((d) => ({
+          id: d.id,
+          documentName: d.documentName,
+          documentUrl: d.documentUrl,
+          documentType: d.documentType,
+          uploadedAt: d.uploadedAt.toISOString()
+        }))
+      };
+    })
   );
+  res.json(withDocs);
 }
 async function endorseCandidate(req, res) {
   const { candidateId } = req.params;
@@ -47924,12 +48033,34 @@ async function endorseCandidate(req, res) {
   });
   res.json({ message: "Endorsement recorded" });
 }
+async function getApplicationSettings(req, res) {
+  const { pollId } = req.params;
+  const rows = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId)).limit(1);
+  if (!rows[0]) {
+    res.json({ pollId, isOpen: false, openAt: null, closeAt: null, timerDurationMinutes: null });
+    return;
+  }
+  const r = rows[0];
+  const isExpired = r.closeAt && /* @__PURE__ */ new Date() > r.closeAt;
+  res.json({
+    pollId,
+    isOpen: r.isOpen && !isExpired,
+    openAt: r.openAt?.toISOString() ?? null,
+    closeAt: r.closeAt?.toISOString() ?? null,
+    timerDurationMinutes: r.timerDurationMinutes ?? null
+  });
+}
+var UPLOADS_DIR;
 var init_candidates_controller = __esm({
   "src/controllers/candidates.controller.ts"() {
     "use strict";
     init_src2();
     init_drizzle_orm();
     init_audit();
+    UPLOADS_DIR = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    }
   }
 });
 
@@ -47945,6 +48076,8 @@ var init_candidates = __esm({
     router6.post("/candidates/apply", requireAuth, requireRole("student"), applyCandidate);
     router6.get("/candidates/my-applications", requireAuth, requireRole("student"), getMyApplications);
     router6.post("/candidates/:candidateId/endorse", requireAuth, requireRole("student"), endorseCandidate);
+    router6.post("/candidates/:candidateId/upload-document", requireAuth, requireRole("student"), uploadCandidateDocument);
+    router6.get("/candidates/application-settings/:pollId", requireAuth, getApplicationSettings);
     candidates_default = router6;
   }
 });
@@ -47986,24 +48119,29 @@ async function getAdminPolls(_req, res) {
       const seats = await db.select({ n: count() }).from(pollSeatsTable).where(eq(pollSeatsTable.pollId, p.id));
       const candidates = await db.select({ n: count() }).from(candidatesTable).where(eq(candidatesTable.pollId, p.id));
       const votes = await db.select({ n: count() }).from(votesTable).where(eq(votesTable.pollId, p.id));
+      const appSettings = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, p.id)).limit(1);
       return {
         id: p.id,
         title: p.title,
         description: p.description,
+        pollType: p.pollType,
         startDate: p.startDate.toISOString(),
         endDate: p.endDate.toISOString(),
         status,
         locked: p.locked,
         seatCount: Number(seats[0]?.n ?? 0),
         candidateCount: Number(candidates[0]?.n ?? 0),
-        voteCount: Number(votes[0]?.n ?? 0)
+        voteCount: Number(votes[0]?.n ?? 0),
+        applicationOpen: appSettings[0]?.isOpen ?? false,
+        applicationCloseAt: appSettings[0]?.closeAt ? appSettings[0].closeAt.toISOString() : null,
+        timerDurationMinutes: appSettings[0]?.timerDurationMinutes ?? null
       };
     })
   );
   res.json(out);
 }
 async function createPoll(req, res) {
-  const { title, description, startDate, endDate, seats } = req.body ?? {};
+  const { title, description, pollType, startDate, endDate, seats } = req.body ?? {};
   if (!title || !startDate || !endDate || !Array.isArray(seats) || seats.length === 0) {
     res.status(400).json({ message: "title, startDate, endDate and at least one seat are required" });
     return;
@@ -48017,6 +48155,7 @@ async function createPoll(req, res) {
   const inserted = await db.insert(pollsTable).values({
     title,
     description: description ?? "",
+    pollType: pollType ?? "general",
     startDate: start,
     endDate: end,
     createdBy: req.user.id
@@ -48043,8 +48182,47 @@ async function createPoll(req, res) {
   });
   res.status(201).json({ id: poll.id, message: "Poll created" });
 }
+async function updatePoll(req, res) {
+  const { pollId } = req.params;
+  const { title, description, startDate, endDate } = req.body ?? {};
+  const existing = await db.select().from(pollsTable).where(eq(pollsTable.id, pollId)).limit(1);
+  if (!existing[0]) {
+    res.status(404).json({ message: "Poll not found" });
+    return;
+  }
+  const updates = {};
+  if (title) updates.title = title;
+  if (description !== void 0) updates.description = description;
+  if (startDate) {
+    const s = new Date(startDate);
+    if (!Number.isNaN(s.getTime())) updates.startDate = s;
+  }
+  if (endDate) {
+    const e = new Date(endDate);
+    if (!Number.isNaN(e.getTime())) updates.endDate = e;
+  }
+  await db.update(pollsTable).set(updates).where(eq(pollsTable.id, pollId));
+  await audit({
+    action: "admin.update_poll",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: pollId,
+    details: title ?? "updated"
+  });
+  res.json({ message: "Poll updated" });
+}
 async function deletePoll(req, res) {
   const { pollId } = req.params;
+  await db.delete(candidateDocumentsTable).where(
+    eq(
+      candidateDocumentsTable.candidateId,
+      db.select({ id: candidatesTable.id }).from(candidatesTable).where(eq(candidatesTable.pollId, pollId)).limit(1)
+    )
+  ).catch(() => {
+  });
+  await db.delete(candidatesTable).where(eq(candidatesTable.pollId, pollId));
+  await db.delete(pollSeatsTable).where(eq(pollSeatsTable.pollId, pollId));
+  await db.delete(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId));
   await db.delete(pollsTable).where(eq(pollsTable.id, pollId));
   await audit({
     action: "admin.delete_poll",
@@ -48065,7 +48243,98 @@ async function lockPoll(req, res) {
   });
   res.json({ message: "Poll locked" });
 }
-async function getUsers(_req, res) {
+async function unlockPoll(req, res) {
+  const { pollId } = req.params;
+  await db.update(pollsTable).set({ locked: false }).where(eq(pollsTable.id, pollId));
+  await audit({
+    action: "admin.unlock_poll",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: pollId
+  });
+  res.json({ message: "Poll unlocked" });
+}
+async function openApplicationWindow(req, res) {
+  const { pollId } = req.params;
+  const { timerDurationMinutes } = req.body ?? {};
+  const pollRows = await db.select().from(pollsTable).where(eq(pollsTable.id, pollId)).limit(1);
+  if (!pollRows[0]) {
+    res.status(404).json({ message: "Poll not found" });
+    return;
+  }
+  const now = /* @__PURE__ */ new Date();
+  const closeAt = timerDurationMinutes ? new Date(now.getTime() + timerDurationMinutes * 60 * 1e3) : null;
+  const existing = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId)).limit(1);
+  if (existing[0]) {
+    await db.update(electionApplicationSettingsTable).set({
+      isOpen: true,
+      openAt: now,
+      closeAt,
+      timerDurationMinutes: timerDurationMinutes ?? null,
+      openedBy: req.user.id,
+      updatedAt: now
+    }).where(eq(electionApplicationSettingsTable.pollId, pollId));
+  } else {
+    await db.insert(electionApplicationSettingsTable).values({
+      pollId,
+      isOpen: true,
+      openAt: now,
+      closeAt,
+      timerDurationMinutes: timerDurationMinutes ?? null,
+      openedBy: req.user.id,
+      updatedAt: now
+    });
+  }
+  await audit({
+    action: "admin.open_application_window",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: pollId,
+    details: timerDurationMinutes ? `timer=${timerDurationMinutes}min` : "no timer"
+  });
+  res.json({ message: "Application window opened", closeAt: closeAt?.toISOString() ?? null });
+}
+async function closeApplicationWindow(req, res) {
+  const { pollId } = req.params;
+  const now = /* @__PURE__ */ new Date();
+  const existing = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId)).limit(1);
+  if (existing[0]) {
+    await db.update(electionApplicationSettingsTable).set({ isOpen: false, closeAt: now, closedBy: req.user.id, updatedAt: now }).where(eq(electionApplicationSettingsTable.pollId, pollId));
+  } else {
+    await db.insert(electionApplicationSettingsTable).values({
+      pollId,
+      isOpen: false,
+      closeAt: now,
+      closedBy: req.user.id,
+      updatedAt: now
+    });
+  }
+  await audit({
+    action: "admin.close_application_window",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: pollId
+  });
+  res.json({ message: "Application window closed" });
+}
+async function getApplicationSettings2(req, res) {
+  const { pollId } = req.params;
+  const rows = await db.select().from(electionApplicationSettingsTable).where(eq(electionApplicationSettingsTable.pollId, pollId)).limit(1);
+  if (!rows[0]) {
+    res.json({ pollId, isOpen: false, openAt: null, closeAt: null, timerDurationMinutes: null });
+    return;
+  }
+  const r = rows[0];
+  res.json({
+    pollId,
+    isOpen: r.isOpen,
+    openAt: r.openAt?.toISOString() ?? null,
+    closeAt: r.closeAt?.toISOString() ?? null,
+    timerDurationMinutes: r.timerDurationMinutes ?? null
+  });
+}
+async function getUsers(req, res) {
+  const genderFilter = req.query.gender;
   const rows = await db.select({
     id: usersTable.id,
     name: usersTable.name,
@@ -48077,10 +48346,12 @@ async function getUsers(_req, res) {
     hostelName: hostelsTable.name,
     courseName: coursesTable.name,
     registrationExpiresAt: usersTable.registrationExpiresAt,
+    feeStatus: usersTable.feeStatus,
     createdAt: usersTable.createdAt
   }).from(usersTable).leftJoin(hostelsTable, eq(usersTable.hostelId, hostelsTable.id)).leftJoin(coursesTable, eq(usersTable.courseId, coursesTable.id)).orderBy(desc(usersTable.createdAt));
+  const filtered = genderFilter && genderFilter !== "all" ? rows.filter((r) => r.gender === genderFilter) : rows;
   res.json(
-    rows.map((r) => ({
+    filtered.map((r) => ({
       id: r.id,
       name: r.name,
       email: r.email,
@@ -48090,10 +48361,32 @@ async function getUsers(_req, res) {
       gender: r.gender ?? null,
       hostelName: r.hostelName ?? null,
       courseName: r.courseName ?? null,
+      feeStatus: r.feeStatus ?? null,
       registrationExpiresAt: r.registrationExpiresAt ? r.registrationExpiresAt.toISOString() : null,
       createdAt: r.createdAt.toISOString()
     }))
   );
+}
+async function removeVoter(req, res) {
+  const { userId } = req.params;
+  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!userRows[0]) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+  if (userRows[0].role === "admin") {
+    res.status(403).json({ message: "Cannot remove an admin user" });
+    return;
+  }
+  await db.delete(usersTable).where(eq(usersTable.id, userId));
+  await audit({
+    action: "admin.remove_voter",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: userId,
+    details: userRows[0].email
+  });
+  res.json({ message: "Voter removed from the system" });
 }
 async function approveUser(req, res) {
   await db.update(usersTable).set({ status: "active" }).where(eq(usersTable.id, req.params.userId));
@@ -48121,26 +48414,45 @@ async function getAdminCandidates(_req, res) {
     name: usersTable.name,
     email: usersTable.email,
     manifesto: candidatesTable.manifesto,
+    slogan: candidatesTable.slogan,
+    bio: candidatesTable.bio,
+    photoUrl: candidatesTable.photoUrl,
     status: candidatesTable.status,
     rejectionReason: candidatesTable.rejectionReason,
+    reviewedAt: candidatesTable.reviewedAt,
     createdAt: candidatesTable.createdAt
   }).from(candidatesTable).leftJoin(pollsTable, eq(candidatesTable.pollId, pollsTable.id)).leftJoin(pollSeatsTable, eq(candidatesTable.seatId, pollSeatsTable.id)).leftJoin(usersTable, eq(candidatesTable.userId, usersTable.id)).orderBy(desc(candidatesTable.createdAt));
-  res.json(
-    rows.map((r) => ({
-      id: r.id,
-      pollId: r.pollId,
-      pollTitle: r.pollTitle ?? "",
-      seatId: r.seatId,
-      seatLabel: r.seatLabel ?? "",
-      userId: r.userId,
-      name: r.name ?? "",
-      email: r.email ?? "",
-      manifesto: r.manifesto,
-      status: r.status,
-      rejectionReason: r.rejectionReason ?? null,
-      createdAt: r.createdAt.toISOString()
-    }))
+  const withDocs = await Promise.all(
+    rows.map(async (r) => {
+      const docs = await db.select().from(candidateDocumentsTable).where(eq(candidateDocumentsTable.candidateId, r.id));
+      return {
+        id: r.id,
+        pollId: r.pollId,
+        pollTitle: r.pollTitle ?? "",
+        seatId: r.seatId,
+        seatLabel: r.seatLabel ?? "",
+        userId: r.userId,
+        name: r.name ?? "",
+        email: r.email ?? "",
+        manifesto: r.manifesto,
+        slogan: r.slogan ?? null,
+        bio: r.bio ?? null,
+        photoUrl: r.photoUrl ?? null,
+        status: r.status,
+        rejectionReason: r.rejectionReason ?? null,
+        reviewedAt: r.reviewedAt?.toISOString() ?? null,
+        createdAt: r.createdAt.toISOString(),
+        documents: docs.map((d) => ({
+          id: d.id,
+          documentName: d.documentName,
+          documentUrl: d.documentUrl,
+          documentType: d.documentType,
+          uploadedAt: d.uploadedAt.toISOString()
+        }))
+      };
+    })
   );
+  res.json(withDocs);
 }
 async function addCandidate(req, res) {
   const { pollId, seatId, userId, manifesto } = req.body ?? {};
@@ -48163,13 +48475,23 @@ async function addCandidate(req, res) {
   res.status(201).json({ id: inserted[0].id, message: "Candidate added" });
 }
 async function approveCandidate(req, res) {
-  await db.update(candidatesTable).set({ status: "approved", rejectionReason: null }).where(eq(candidatesTable.id, req.params.candidateId));
+  await db.update(candidatesTable).set({
+    status: "approved",
+    rejectionReason: null,
+    reviewedBy: req.user.id,
+    reviewedAt: /* @__PURE__ */ new Date()
+  }).where(eq(candidatesTable.id, req.params.candidateId));
   await audit({ action: "admin.approve_candidate", actorEmail: req.user.email, actorRole: "admin", target: req.params.candidateId });
   res.json({ message: "Candidate approved" });
 }
 async function rejectCandidate(req, res) {
   const { reason } = req.body ?? {};
-  await db.update(candidatesTable).set({ status: "rejected", rejectionReason: reason ?? null }).where(eq(candidatesTable.id, req.params.candidateId));
+  await db.update(candidatesTable).set({
+    status: "rejected",
+    rejectionReason: reason ?? null,
+    reviewedBy: req.user.id,
+    reviewedAt: /* @__PURE__ */ new Date()
+  }).where(eq(candidatesTable.id, req.params.candidateId));
   await audit({
     action: "admin.reject_candidate",
     actorEmail: req.user.email,
@@ -48220,6 +48542,251 @@ async function getReports(_req, res) {
     participation
   });
 }
+async function getElectionResultsReport(_req, res) {
+  const polls = await db.select().from(pollsTable).orderBy(desc(pollsTable.createdAt));
+  const now = /* @__PURE__ */ new Date();
+  const results = await Promise.all(
+    polls.map(async (p) => {
+      const status = now < p.startDate ? "upcoming" : now > p.endDate ? "closed" : "active";
+      const seats = await db.select().from(pollSeatsTable).where(eq(pollSeatsTable.pollId, p.id));
+      const seatResults = await Promise.all(
+        seats.map(async (s) => {
+          const candidates = await db.select({ id: candidatesTable.id, name: usersTable.name }).from(candidatesTable).leftJoin(usersTable, eq(candidatesTable.userId, usersTable.id)).where(and(eq(candidatesTable.seatId, s.id), eq(candidatesTable.status, "approved")));
+          const counts = await Promise.all(
+            candidates.map(async (c) => {
+              const r = await db.select({ n: count() }).from(votesTable).where(and(eq(votesTable.seatId, s.id), eq(votesTable.candidateId, c.id)));
+              return { id: c.id, name: c.name ?? "", votes: Number(r[0]?.n ?? 0) };
+            })
+          );
+          const total = counts.reduce((a, c) => a + c.votes, 0);
+          const winner = counts.length ? counts.reduce((best, c) => c.votes > best.votes ? c : best, counts[0]) : null;
+          return {
+            seatId: s.id,
+            seatLabel: s.label,
+            scope: s.scope,
+            totalVotes: total,
+            candidates: counts.map((c) => ({
+              ...c,
+              percentage: total > 0 ? Math.round(c.votes / total * 1e3) / 10 : 0,
+              rank: counts.filter((x) => x.votes > c.votes).length + 1
+            })),
+            winner: winner && winner.votes > 0 ? { id: winner.id, name: winner.name } : null
+          };
+        })
+      );
+      return {
+        pollId: p.id,
+        pollTitle: p.title,
+        pollType: p.pollType,
+        status,
+        startDate: p.startDate.toISOString(),
+        endDate: p.endDate.toISOString(),
+        seats: seatResults
+      };
+    })
+  );
+  res.json({ generatedAt: (/* @__PURE__ */ new Date()).toISOString(), results });
+}
+async function getVoterTurnoutReport(_req, res) {
+  const polls = await db.select().from(pollsTable).orderBy(desc(pollsTable.createdAt));
+  const now = /* @__PURE__ */ new Date();
+  const allStudents = await db.select({
+    id: usersTable.id,
+    schoolId: schoolsTable.id,
+    schoolName: schoolsTable.name
+  }).from(usersTable).leftJoin(coursesTable, eq(usersTable.courseId, coursesTable.id)).leftJoin(departmentsTable, eq(coursesTable.departmentId, departmentsTable.id)).leftJoin(schoolsTable, eq(departmentsTable.schoolId, schoolsTable.id)).where(and(eq(usersTable.role, "student"), eq(usersTable.status, "active")));
+  const turnout = await Promise.all(
+    polls.map(async (p) => {
+      const status = now < p.startDate ? "upcoming" : now > p.endDate ? "closed" : "active";
+      const voterIds = await db.selectDistinct({ userId: ballotTokensTable.userId }).from(ballotTokensTable).where(and(eq(ballotTokensTable.pollId, p.id), eq(ballotTokensTable.used, true)));
+      const votedSet = new Set(voterIds.map((v) => v.userId));
+      const totalEligible = allStudents.length;
+      const totalVoted = voterIds.length;
+      const bySchool = {};
+      for (const s of allStudents) {
+        const key = s.schoolId ?? "unassigned";
+        if (!bySchool[key]) bySchool[key] = { schoolName: s.schoolName ?? "Unassigned", eligible: 0, voted: 0 };
+        bySchool[key].eligible++;
+        if (votedSet.has(s.id)) bySchool[key].voted++;
+      }
+      return {
+        pollId: p.id,
+        pollTitle: p.title,
+        status,
+        startDate: p.startDate.toISOString(),
+        endDate: p.endDate.toISOString(),
+        totalRegistered: totalEligible,
+        totalVoted,
+        turnoutPercent: totalEligible > 0 ? Math.round(totalVoted / totalEligible * 1e3) / 10 : 0,
+        bySchool: Object.entries(bySchool).map(([id, v]) => ({
+          schoolId: id,
+          schoolName: v.schoolName,
+          eligible: v.eligible,
+          voted: v.voted,
+          turnoutPercent: v.eligible > 0 ? Math.round(v.voted / v.eligible * 1e3) / 10 : 0
+        }))
+      };
+    })
+  );
+  res.json({ generatedAt: (/* @__PURE__ */ new Date()).toISOString(), turnout });
+}
+async function getCandidateReport(_req, res) {
+  const rows = await db.select({
+    id: candidatesTable.id,
+    pollId: candidatesTable.pollId,
+    pollTitle: pollsTable.title,
+    seatId: candidatesTable.seatId,
+    seatLabel: pollSeatsTable.label,
+    userId: candidatesTable.userId,
+    name: usersTable.name,
+    email: usersTable.email,
+    gender: usersTable.gender,
+    registrationNumber: usersTable.registrationNumber,
+    courseName: coursesTable.name,
+    manifesto: candidatesTable.manifesto,
+    slogan: candidatesTable.slogan,
+    bio: candidatesTable.bio,
+    photoUrl: candidatesTable.photoUrl,
+    status: candidatesTable.status,
+    rejectionReason: candidatesTable.rejectionReason,
+    reviewedAt: candidatesTable.reviewedAt,
+    createdAt: candidatesTable.createdAt
+  }).from(candidatesTable).leftJoin(pollsTable, eq(candidatesTable.pollId, pollsTable.id)).leftJoin(pollSeatsTable, eq(candidatesTable.seatId, pollSeatsTable.id)).leftJoin(usersTable, eq(candidatesTable.userId, usersTable.id)).leftJoin(coursesTable, eq(usersTable.courseId, coursesTable.id)).orderBy(desc(candidatesTable.createdAt));
+  const withDocs = await Promise.all(
+    rows.map(async (r) => {
+      const docs = await db.select().from(candidateDocumentsTable).where(eq(candidateDocumentsTable.candidateId, r.id));
+      return {
+        id: r.id,
+        pollId: r.pollId,
+        pollTitle: r.pollTitle ?? "",
+        seatId: r.seatId,
+        seatLabel: r.seatLabel ?? "",
+        userId: r.userId,
+        name: r.name ?? "",
+        email: r.email ?? "",
+        gender: r.gender ?? null,
+        registrationNumber: r.registrationNumber ?? null,
+        courseName: r.courseName ?? null,
+        manifesto: r.manifesto,
+        slogan: r.slogan ?? null,
+        bio: r.bio ?? null,
+        photoUrl: r.photoUrl ?? null,
+        status: r.status,
+        rejectionReason: r.rejectionReason ?? null,
+        reviewedAt: r.reviewedAt?.toISOString() ?? null,
+        submittedAt: r.createdAt.toISOString(),
+        documents: docs.map((d) => ({
+          id: d.id,
+          documentName: d.documentName,
+          documentUrl: d.documentUrl,
+          documentType: d.documentType,
+          uploadedAt: d.uploadedAt.toISOString()
+        }))
+      };
+    })
+  );
+  res.json({ generatedAt: (/* @__PURE__ */ new Date()).toISOString(), candidates: withDocs });
+}
+async function getVoterParticipationReport(_req, res) {
+  const voters = await db.select({
+    id: usersTable.id,
+    name: usersTable.name,
+    email: usersTable.email,
+    registrationNumber: usersTable.registrationNumber,
+    gender: usersTable.gender,
+    status: usersTable.status,
+    feeStatus: usersTable.feeStatus,
+    createdAt: usersTable.createdAt
+  }).from(usersTable).where(eq(usersTable.role, "student")).orderBy(desc(usersTable.createdAt));
+  const polls = await db.select().from(pollsTable);
+  const report = await Promise.all(
+    voters.map(async (v) => {
+      const votingActivity = await Promise.all(
+        polls.map(async (p) => {
+          const tokens = await db.select().from(ballotTokensTable).where(and(
+            eq(ballotTokensTable.pollId, p.id),
+            eq(ballotTokensTable.userId, v.id),
+            eq(ballotTokensTable.used, true)
+          ));
+          return {
+            pollId: p.id,
+            pollTitle: p.title,
+            voted: tokens.length > 0,
+            votedAt: tokens[0]?.usedAt?.toISOString() ?? null,
+            seatsVoted: tokens.length
+          };
+        })
+      );
+      const totalVoted = votingActivity.filter((a) => a.voted).length;
+      return {
+        id: v.id,
+        name: v.name,
+        email: v.email,
+        registrationNumber: v.registrationNumber ?? null,
+        gender: v.gender ?? null,
+        status: v.status,
+        feeStatus: v.feeStatus ?? null,
+        registeredAt: v.createdAt.toISOString(),
+        totalPollsVoted: totalVoted,
+        totalPolls: polls.length,
+        participationRate: polls.length > 0 ? Math.round(totalVoted / polls.length * 1e3) / 10 : 0,
+        votingActivity
+      };
+    })
+  );
+  res.json({ generatedAt: (/* @__PURE__ */ new Date()).toISOString(), voters: report });
+}
+async function getRejectedCandidatesReport(_req, res) {
+  const rows = await db.select({
+    id: candidatesTable.id,
+    pollId: candidatesTable.pollId,
+    pollTitle: pollsTable.title,
+    seatId: candidatesTable.seatId,
+    seatLabel: pollSeatsTable.label,
+    userId: candidatesTable.userId,
+    name: usersTable.name,
+    email: usersTable.email,
+    gender: usersTable.gender,
+    registrationNumber: usersTable.registrationNumber,
+    manifesto: candidatesTable.manifesto,
+    status: candidatesTable.status,
+    rejectionReason: candidatesTable.rejectionReason,
+    reviewedAt: candidatesTable.reviewedAt,
+    createdAt: candidatesTable.createdAt
+  }).from(candidatesTable).leftJoin(pollsTable, eq(candidatesTable.pollId, pollsTable.id)).leftJoin(pollSeatsTable, eq(candidatesTable.seatId, pollSeatsTable.id)).leftJoin(usersTable, eq(candidatesTable.userId, usersTable.id)).where(
+    and(
+      eq(candidatesTable.status, "rejected")
+    )
+  ).orderBy(desc(candidatesTable.createdAt));
+  const withDocs = await Promise.all(
+    rows.map(async (r) => {
+      const docs = await db.select().from(candidateDocumentsTable).where(eq(candidateDocumentsTable.candidateId, r.id));
+      return {
+        id: r.id,
+        pollId: r.pollId,
+        pollTitle: r.pollTitle ?? "",
+        seatId: r.seatId,
+        seatLabel: r.seatLabel ?? "",
+        name: r.name ?? "",
+        email: r.email ?? "",
+        gender: r.gender ?? null,
+        registrationNumber: r.registrationNumber ?? null,
+        positionAppliedFor: r.seatLabel ?? "",
+        rejectionReason: r.rejectionReason ?? "No reason provided",
+        reviewedAt: r.reviewedAt?.toISOString() ?? null,
+        submittedAt: r.createdAt.toISOString(),
+        status: r.status,
+        documents: docs.map((d) => ({
+          id: d.id,
+          documentName: d.documentName,
+          documentUrl: d.documentUrl,
+          documentType: d.documentType
+        }))
+      };
+    })
+  );
+  res.json({ generatedAt: (/* @__PURE__ */ new Date()).toISOString(), rejected: withDocs });
+}
 async function getAuditLog(_req, res) {
   const rows = await db.select().from(auditLogTable).orderBy(desc(auditLogTable.createdAt)).limit(500);
   res.json(
@@ -48230,9 +48797,26 @@ async function getAuditLog(_req, res) {
       actorRole: r.actorRole ?? null,
       target: r.target ?? null,
       details: r.details ?? null,
+      ipAddress: r.ipAddress ?? null,
       createdAt: r.createdAt.toISOString()
     }))
   );
+}
+async function resetAdminPassword(req, res) {
+  const { userId } = req.params;
+  const { newPassword } = req.body ?? {};
+  if (!newPassword || newPassword.length < 8) {
+    res.status(400).json({ message: "newPassword must be at least 8 characters" });
+    return;
+  }
+  await db.update(usersTable).set({ passwordHash: hashPassword(newPassword) }).where(eq(usersTable.id, userId));
+  await audit({
+    action: "admin.reset_password",
+    actorEmail: req.user.email,
+    actorRole: "admin",
+    target: userId
+  });
+  res.json({ message: "Password reset successfully" });
 }
 var init_admin_controller = __esm({
   "src/controllers/admin.controller.ts"() {
@@ -48257,17 +48841,29 @@ var init_admin = __esm({
     router7.get("/admin/dashboard", getDashboard);
     router7.get("/admin/polls", getAdminPolls);
     router7.post("/admin/polls", createPoll);
+    router7.put("/admin/polls/:pollId", updatePoll);
     router7.delete("/admin/polls/:pollId", deletePoll);
     router7.post("/admin/polls/:pollId/lock", lockPoll);
+    router7.post("/admin/polls/:pollId/unlock", unlockPoll);
+    router7.post("/admin/polls/:pollId/open-applications", openApplicationWindow);
+    router7.post("/admin/polls/:pollId/close-applications", closeApplicationWindow);
+    router7.get("/admin/polls/:pollId/application-settings", getApplicationSettings2);
     router7.get("/admin/users", getUsers);
+    router7.delete("/admin/users/:userId", removeVoter);
     router7.post("/admin/users/:userId/approve", approveUser);
     router7.post("/admin/users/:userId/disable", disableUser);
     router7.post("/admin/users/:userId/promote", promoteUser);
+    router7.post("/admin/users/:userId/reset-password", resetAdminPassword);
     router7.get("/admin/candidates", getAdminCandidates);
     router7.post("/admin/candidates", addCandidate);
     router7.post("/admin/candidates/:candidateId/approve", approveCandidate);
     router7.post("/admin/candidates/:candidateId/reject", rejectCandidate);
     router7.get("/admin/reports", getReports);
+    router7.get("/admin/reports/election-results", getElectionResultsReport);
+    router7.get("/admin/reports/voter-turnout", getVoterTurnoutReport);
+    router7.get("/admin/reports/candidate-report", getCandidateReport);
+    router7.get("/admin/reports/voter-participation", getVoterParticipationReport);
+    router7.get("/admin/reports/rejected-candidates", getRejectedCandidatesReport);
     router7.get("/admin/audit", getAuditLog);
     admin_default = router7;
   }
@@ -51198,7 +51794,7 @@ var require_braces = __commonJS({
 var require_constants3 = __commonJS({
   "../node_modules/.pnpm/picomatch@2.3.2/node_modules/picomatch/lib/constants.js"(exports, module) {
     "use strict";
-    var path2 = __require("path");
+    var path4 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -51372,7 +51968,7 @@ var require_constants3 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path2.sep,
+      SEP: path4.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -51399,7 +51995,7 @@ var require_constants3 = __commonJS({
 var require_utils7 = __commonJS({
   "../node_modules/.pnpm/picomatch@2.3.2/node_modules/picomatch/lib/utils.js"(exports) {
     "use strict";
-    var path2 = __require("path");
+    var path4 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -51428,7 +52024,7 @@ var require_utils7 = __commonJS({
       if (options && typeof options.windows === "boolean") {
         return options.windows;
       }
-      return win32 === true || path2.sep === "\\";
+      return win32 === true || path4.sep === "\\";
     };
     exports.escapeLast = (input, char2, lastIdx) => {
       const idx = input.lastIndexOf(char2, lastIdx);
@@ -52792,7 +53388,7 @@ var require_parse3 = __commonJS({
 var require_picomatch = __commonJS({
   "../node_modules/.pnpm/picomatch@2.3.2/node_modules/picomatch/lib/picomatch.js"(exports, module) {
     "use strict";
-    var path2 = __require("path");
+    var path4 = __require("path");
     var scan = require_scan();
     var parse = require_parse3();
     var utils = require_utils7();
@@ -52877,7 +53473,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
-      return regex.test(path2.basename(input));
+      return regex.test(path4.basename(input));
     };
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
@@ -53210,12 +53806,12 @@ var require_path_rewriter = __commonJS({
         rulesCache = parsePathRewriteRules(rewriteConfig);
         return rewritePath;
       }
-      function rewritePath(path2) {
-        let result = path2;
+      function rewritePath(path4) {
+        let result = path4;
         for (const rule of rulesCache) {
-          if (rule.regex.test(path2)) {
+          if (rule.regex.test(path4)) {
             result = result.replace(rule.regex, rule.value);
-            debug('rewriting path from "%s" to "%s"', path2, result);
+            debug('rewriting path from "%s" to "%s"', path4, result);
             break;
           }
         }
@@ -53271,8 +53867,8 @@ var require_router2 = __commonJS({
     function getTargetFromProxyTable(req, table) {
       let result;
       const host = req.headers.host;
-      const path2 = req.url;
-      const hostAndPath = host + path2;
+      const path4 = req.url;
+      const hostAndPath = host + path4;
       for (const [key, value] of Object.entries(table)) {
         if (containsPath(key)) {
           if (hostAndPath.indexOf(key) > -1) {
@@ -53387,10 +53983,10 @@ var require_http_proxy_middleware = __commonJS({
         };
         this.applyPathRewrite = async (req, pathRewriter) => {
           if (pathRewriter) {
-            const path2 = await pathRewriter(req.url, req);
-            if (typeof path2 === "string") {
+            const path4 = await pathRewriter(req.url, req);
+            if (typeof path4 === "string") {
               (0, debug_1.Debug)("pathRewrite new path: %s", req.url);
-              req.url = path2;
+              req.url = path4;
             } else {
               (0, debug_1.Debug)("pathRewrite: no rewritten path found: %s", req.url);
             }
@@ -53782,7 +54378,8 @@ var app_exports = {};
 __export(app_exports, {
   default: () => app_default
 });
-var import_express9, import_cors, import_pino_http, app, app_default;
+import path2 from "node:path";
+var import_express9, import_cors, import_pino_http, app, UPLOADS_DIR2, app_default;
 var init_app = __esm({
   async "src/app.ts"() {
     "use strict";
@@ -53792,28 +54389,24 @@ var init_app = __esm({
     init_routes();
     init_logger2();
     app = (0, import_express9.default)();
+    UPLOADS_DIR2 = path2.join(process.cwd(), "uploads");
     app.use(
       (0, import_pino_http.pinoHttp)({
         logger,
         serializers: {
           req(req) {
-            return {
-              id: req.id,
-              method: req.method,
-              url: req.url?.split("?")[0]
-            };
+            return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
           },
           res(res) {
-            return {
-              statusCode: res.statusCode
-            };
+            return { statusCode: res.statusCode };
           }
         }
       })
     );
     app.use((0, import_cors.default)());
-    app.use(import_express9.default.json());
-    app.use(import_express9.default.urlencoded({ extended: true }));
+    app.use(import_express9.default.json({ limit: "20mb" }));
+    app.use(import_express9.default.urlencoded({ extended: true, limit: "20mb" }));
+    app.use("/api/uploads", import_express9.default.static(UPLOADS_DIR2));
     app.use("/api", routes_default);
     if (process.env.NODE_ENV !== "production") {
       const { createProxyMiddleware } = await Promise.resolve().then(() => __toESM(require_dist3(), 1));
@@ -53892,12 +54485,12 @@ var init_seed = __esm({
 
 // src/index.ts
 var import_dotenv = __toESM(require_main(), 1);
-import path from "path";
+import path3 from "path";
 import { fileURLToPath } from "url";
 var __filename = fileURLToPath(import.meta.url);
-var __dirname2 = path.dirname(__filename);
-import_dotenv.default.config({ path: path.resolve(__dirname2, "../.env") });
-import_dotenv.default.config({ path: path.resolve(__dirname2, "../../../.env") });
+var __dirname2 = path3.dirname(__filename);
+import_dotenv.default.config({ path: path3.resolve(__dirname2, "../.env") });
+import_dotenv.default.config({ path: path3.resolve(__dirname2, "../../../.env") });
 console.log("\u2705 Environment Variables Loaded");
 var { default: app2 } = await init_app().then(() => app_exports);
 var { logger: logger2 } = await Promise.resolve().then(() => (init_logger2(), logger_exports));

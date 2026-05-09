@@ -1,10 +1,25 @@
 import type { Request, Response } from "express";
-import { db, candidatesTable, pollsTable, pollSeatsTable, endorsementsTable } from "@workspace/db";
+import path from "node:path";
+import fs from "node:fs";
+import {
+  db,
+  candidatesTable,
+  candidateDocumentsTable,
+  pollsTable,
+  pollSeatsTable,
+  endorsementsTable,
+  electionApplicationSettingsTable,
+} from "@workspace/db";
 import { and, desc, eq } from "drizzle-orm";
 import { audit } from "../lib/audit";
 
+const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
 export async function applyCandidate(req: Request, res: Response) {
-  const { pollId, seatId, manifesto } = (req.body ?? {}) as Record<string, string>;
+  const { pollId, seatId, manifesto, slogan, bio } = (req.body ?? {}) as Record<string, string>;
   if (!pollId || !seatId || !manifesto) {
     res.status(400).json({ message: "pollId, seatId and manifesto are required" });
     return;
@@ -15,8 +30,22 @@ export async function applyCandidate(req: Request, res: Response) {
     res.status(404).json({ message: "Poll not found" });
     return;
   }
-  if (poll.locked) {
-    res.status(400).json({ message: "Candidate window is closed for this poll" });
+  const appSettings = await db
+    .select()
+    .from(electionApplicationSettingsTable)
+    .where(eq(electionApplicationSettingsTable.pollId, pollId))
+    .limit(1);
+  const settings = appSettings[0];
+  if (!settings || !settings.isOpen) {
+    res.status(400).json({ message: "The application window for this poll is currently closed. Please wait until the admin opens it." });
+    return;
+  }
+  if (settings.closeAt && new Date() > settings.closeAt) {
+    await db
+      .update(electionApplicationSettingsTable)
+      .set({ isOpen: false })
+      .where(eq(electionApplicationSettingsTable.pollId, pollId));
+    res.status(400).json({ message: "The application window has expired." });
     return;
   }
   const seatRows = await db
@@ -39,7 +68,7 @@ export async function applyCandidate(req: Request, res: Response) {
   }
   const inserted = await db
     .insert(candidatesTable)
-    .values({ pollId, seatId, userId: req.user!.id, manifesto, status: "pending" })
+    .values({ pollId, seatId, userId: req.user!.id, manifesto, slogan: slogan ?? null, bio: bio ?? null, status: "pending" })
     .returning();
   await audit({
     action: "candidate.apply",
@@ -48,6 +77,47 @@ export async function applyCandidate(req: Request, res: Response) {
     target: seatId,
   });
   res.status(201).json({ id: inserted[0].id, message: "Application submitted" });
+}
+
+export async function uploadCandidateDocument(req: Request, res: Response) {
+  const { candidateId } = req.params;
+  const { documentName, documentType, fileData, fileName } = (req.body ?? {}) as Record<string, string>;
+  if (!documentName || !fileData || !fileName) {
+    res.status(400).json({ message: "documentName, fileData and fileName are required" });
+    return;
+  }
+  const candRows = await db
+    .select()
+    .from(candidatesTable)
+    .where(and(eq(candidatesTable.id, candidateId), eq(candidatesTable.userId, req.user!.id)))
+    .limit(1);
+  if (!candRows[0]) {
+    res.status(404).json({ message: "Candidate application not found" });
+    return;
+  }
+  const ext = path.extname(fileName).toLowerCase();
+  const safeFileName = `${candidateId}_${Date.now()}${ext}`;
+  const filePath = path.join(UPLOADS_DIR, safeFileName);
+  const base64Data = fileData.replace(/^data:[^;]+;base64,/, "");
+  fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+  const documentUrl = `/api/uploads/${safeFileName}`;
+  const inserted = await db
+    .insert(candidateDocumentsTable)
+    .values({
+      candidateId,
+      documentName,
+      documentUrl,
+      documentType: documentType ?? "document",
+    })
+    .returning();
+  await audit({
+    action: "candidate.upload_document",
+    actorEmail: req.user!.email,
+    actorRole: "student",
+    target: candidateId,
+    details: documentName,
+  });
+  res.status(201).json({ id: inserted[0].id, documentUrl, message: "Document uploaded" });
 }
 
 export async function getMyApplications(req: Request, res: Response) {
@@ -59,6 +129,9 @@ export async function getMyApplications(req: Request, res: Response) {
       seatId: candidatesTable.seatId,
       seatLabel: pollSeatsTable.label,
       manifesto: candidatesTable.manifesto,
+      slogan: candidatesTable.slogan,
+      bio: candidatesTable.bio,
+      photoUrl: candidatesTable.photoUrl,
       status: candidatesTable.status,
       rejectionReason: candidatesTable.rejectionReason,
       createdAt: candidatesTable.createdAt,
@@ -68,19 +141,37 @@ export async function getMyApplications(req: Request, res: Response) {
     .leftJoin(pollSeatsTable, eq(candidatesTable.seatId, pollSeatsTable.id))
     .where(eq(candidatesTable.userId, req.user!.id))
     .orderBy(desc(candidatesTable.createdAt));
-  res.json(
-    rows.map((r) => ({
-      id: r.id,
-      pollId: r.pollId,
-      pollTitle: r.pollTitle ?? "",
-      seatId: r.seatId,
-      seatLabel: r.seatLabel ?? "",
-      manifesto: r.manifesto,
-      status: r.status as "pending" | "endorsed" | "approved" | "rejected",
-      rejectionReason: r.rejectionReason ?? null,
-      createdAt: r.createdAt.toISOString(),
-    })),
+
+  const withDocs = await Promise.all(
+    rows.map(async (r) => {
+      const docs = await db
+        .select()
+        .from(candidateDocumentsTable)
+        .where(eq(candidateDocumentsTable.candidateId, r.id));
+      return {
+        id: r.id,
+        pollId: r.pollId,
+        pollTitle: r.pollTitle ?? "",
+        seatId: r.seatId,
+        seatLabel: r.seatLabel ?? "",
+        manifesto: r.manifesto,
+        slogan: r.slogan ?? null,
+        bio: r.bio ?? null,
+        photoUrl: r.photoUrl ?? null,
+        status: r.status as "pending" | "endorsed" | "approved" | "rejected",
+        rejectionReason: r.rejectionReason ?? null,
+        createdAt: r.createdAt.toISOString(),
+        documents: docs.map((d) => ({
+          id: d.id,
+          documentName: d.documentName,
+          documentUrl: d.documentUrl,
+          documentType: d.documentType,
+          uploadedAt: d.uploadedAt.toISOString(),
+        })),
+      };
+    }),
   );
+  res.json(withDocs);
 }
 
 export async function endorseCandidate(req: Request, res: Response) {
@@ -117,4 +208,26 @@ export async function endorseCandidate(req: Request, res: Response) {
     target: candidateId,
   });
   res.json({ message: "Endorsement recorded" });
+}
+
+export async function getApplicationSettings(req: Request, res: Response) {
+  const { pollId } = req.params;
+  const rows = await db
+    .select()
+    .from(electionApplicationSettingsTable)
+    .where(eq(electionApplicationSettingsTable.pollId, pollId))
+    .limit(1);
+  if (!rows[0]) {
+    res.json({ pollId, isOpen: false, openAt: null, closeAt: null, timerDurationMinutes: null });
+    return;
+  }
+  const r = rows[0];
+  const isExpired = r.closeAt && new Date() > r.closeAt;
+  res.json({
+    pollId,
+    isOpen: r.isOpen && !isExpired,
+    openAt: r.openAt?.toISOString() ?? null,
+    closeAt: r.closeAt?.toISOString() ?? null,
+    timerDurationMinutes: r.timerDurationMinutes ?? null,
+  });
 }
