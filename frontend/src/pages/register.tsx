@@ -186,7 +186,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-secondary/30 flex flex-col">
+    <div className="min-h-screen w-full bg-linear-to-br from-background via-background to-secondary/30 flex flex-col">
       <header className="container mx-auto flex items-center justify-between p-4">
         <Brand />
         <ThemeToggle />

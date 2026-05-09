@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Brand } from "@/components/brand";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +40,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-secondary/95 to-background text-secondary-foreground flex flex-col">
+    <div className="min-h-screen w-full bg-linear-to-br from-secondary via-secondary/95 to-background text-secondary-foreground flex flex-col">
       <header className="container mx-auto flex items-center justify-between p-4">
         <Brand />
         <ThemeToggle />
@@ -54,7 +60,8 @@ export default function AdminLoginPage() {
                 <CardTitle className="text-2xl">Admin Console</CardTitle>
               </div>
               <CardDescription>
-                Restricted area. Authorised KUSA Electoral Commission staff only.
+                Restricted area. Authorised KUSA Electoral Commission staff
+                only.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -81,12 +88,19 @@ export default function AdminLoginPage() {
                   />
                 </div>
                 <Button className="w-full gap-2" disabled={mut.isPending}>
-                  {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                  {mut.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4" />
+                  )}
                   Sign in
                 </Button>
                 <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
                   <p className="font-medium">Default admin credentials</p>
-                  <p>admin@ku.ac.ke / Admin123 (please change after first sign-in)</p>
+                  <p>
+                    admin@ku.ac.ke / Admin123 (please change after first
+                    sign-in)
+                  </p>
                 </div>
                 <p className="text-center text-xs text-muted-foreground">
                   <Link href="/login" className="font-medium hover:underline">

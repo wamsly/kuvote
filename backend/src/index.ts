@@ -1,45 +1,44 @@
+/**
+ * index.ts
+ * Main entry point for the API server.
+ */
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// 1. INITIALIZE ENVIRONMENT IMMEDIATELY
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-dotenv.config();
 
-import app from "./app";
-import { logger } from "./lib/logger";
-import { seedCatalog } from "./seed";
+// Load from backend root or workspace root
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+
+console.log("✅ Environment Variables Loaded");
+
+// 2. NOW IMPORT THE REST OF THE APP
+// We use dynamic imports to ensure the environment is ready before these modules load
+const { default: app } = await import("./app.js");
+const { logger } = await import("./lib/logger.js");
+const { seedCatalog } = await import("./seed.js");
 
 const rawPort = process.env["PORT"] ?? "8080";
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
 
 async function main() {
   try {
     await seedCatalog();
+    logger.info("Database seeding checked.");
   } catch (err) {
-    logger.error({ err }, "Failed to seed catalog");
+    // We don't want to crash the whole app if seeding fails
+    console.error("Failed to seed catalog:", err);
   }
 
-  app.listen(port, (err) => {
-    if (err) {
-      logger.error({ err }, "Error listening on port");
-      process.exit(1);
-    }
-    logger.info({ port }, "Server listening");
+  app.listen(Number(rawPort), () => {
+    console.log(`🚀 Server listening on port ${rawPort}`);
   });
 }
 
-main();
+main().catch((err) => {
+  console.error("Fatal error during startup:", err);
+  process.exit(1);
+});
