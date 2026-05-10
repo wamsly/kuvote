@@ -1,6 +1,7 @@
 export {
   db,
   pool,
+  studentRecordsTable,
   usersTable,
   otpsTable,
   schoolsTable,
