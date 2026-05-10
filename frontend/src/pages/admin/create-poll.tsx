@@ -19,7 +19,7 @@ import { toast } from "sonner";
 type Seat = {
   code: string;
   label: string;
-  scope: "school" | "department" | "hostel" | "sgc" | "university";
+  scope: "school" | "department" | "hostel" | "sgc" | "university" | "non-residential" | "residential";
   scopeRefId: string;
   gender: "" | "male" | "female";
 };
@@ -170,6 +170,8 @@ export default function AdminCreatePollPage() {
                       <SelectItem value="school">School</SelectItem>
                       <SelectItem value="department">Department</SelectItem>
                       <SelectItem value="hostel">Hostel</SelectItem>
+                      <SelectItem value="residential">Residential (hostel students)</SelectItem>
+                      <SelectItem value="non-residential">Non-Residential (off-campus)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -191,7 +193,12 @@ export default function AdminCreatePollPage() {
                       <SelectContent>{hostels.map((x: any) => <SelectItem key={x.id} value={x.id}>{x.name}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : (
-                    <Input disabled value={s.scope === "sgc" ? "SGC — all eligible voters" : "—"} className="text-muted-foreground" />
+                    <Input disabled value={
+                      s.scope === "sgc" ? "SGC — all eligible voters" :
+                      s.scope === "residential" ? "Hostel students only" :
+                      s.scope === "non-residential" ? "Off-campus students only" :
+                      "—"
+                    } className="text-muted-foreground" />
                   )}
                 </div>
                 <div className="space-y-1.5 md:col-span-1">
