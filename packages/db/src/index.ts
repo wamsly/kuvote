@@ -9,6 +9,7 @@ import {
   timestamp,
   boolean,
   integer,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -18,6 +19,21 @@ if (!DATABASE_URL) {
 
 export const pool = new Pool({ connectionString: DATABASE_URL });
 export const db = drizzle(pool);
+
+export const studentRecordsTable = pgTable("student_records", {
+  registrationNumber: varchar("registration_number", { length: 50 }).primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  gender: varchar("gender", { length: 10 }).notNull(),
+  schoolId: text("school_id").notNull(),
+  departmentId: text("department_id").notNull(),
+  courseId: text("course_id").notNull(),
+  hostelId: text("hostel_id"),
+  yearOfStudy: integer("year_of_study").notNull().default(1),
+  phoneNumber: varchar("phone_number", { length: 20 }),
+  feeBalance: numeric("fee_balance", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
 
 export const usersTable = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),

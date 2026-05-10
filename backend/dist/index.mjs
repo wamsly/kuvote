@@ -46064,7 +46064,7 @@ var init_node_postgres = __esm({
 });
 
 // ../packages/db/src/index.ts
-var Pool3, DATABASE_URL, pool, db, usersTable, otpsTable, schoolsTable, departmentsTable, coursesTable, hostelsTable, pollsTable, pollSeatsTable, candidatesTable, candidateDocumentsTable, electionApplicationSettingsTable, endorsementsTable, ballotTokensTable, votesTable, auditLogTable;
+var Pool3, DATABASE_URL, pool, db, studentRecordsTable, usersTable, otpsTable, schoolsTable, departmentsTable, coursesTable, hostelsTable, pollsTable, pollSeatsTable, candidatesTable, candidateDocumentsTable, electionApplicationSettingsTable, endorsementsTable, ballotTokensTable, votesTable, auditLogTable;
 var init_src2 = __esm({
   "../packages/db/src/index.ts"() {
     "use strict";
@@ -46078,6 +46078,20 @@ var init_src2 = __esm({
     }
     pool = new Pool3({ connectionString: DATABASE_URL });
     db = drizzle(pool);
+    studentRecordsTable = pgTable("student_records", {
+      registrationNumber: varchar("registration_number", { length: 50 }).primaryKey(),
+      name: varchar("name", { length: 255 }).notNull(),
+      email: varchar("email", { length: 255 }).notNull().unique(),
+      gender: varchar("gender", { length: 10 }).notNull(),
+      schoolId: text("school_id").notNull(),
+      departmentId: text("department_id").notNull(),
+      courseId: text("course_id").notNull(),
+      hostelId: text("hostel_id"),
+      yearOfStudy: integer("year_of_study").notNull().default(1),
+      phoneNumber: varchar("phone_number", { length: 20 }),
+      feeBalance: numeric("fee_balance", { precision: 10, scale: 2 }).notNull().default("0.00"),
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+    });
     usersTable = pgTable("users", {
       id: uuid("id").defaultRandom().primaryKey(),
       name: varchar("name", { length: 255 }).notNull(),
@@ -47144,6 +47158,14 @@ function addMonths(date2, months) {
   d.setMonth(d.getMonth() + months);
   return d;
 }
+function validatePasswordStrength(password) {
+  if (password.length < 8) return "Password must be at least 8 characters long";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter (A-Z)";
+  if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter (a-z)";
+  if (!/[0-9]/.test(password)) return "Password must contain at least one number (0-9)";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Password must contain at least one special character (e.g. !@#$%^&*)";
+  return null;
+}
 async function issueOtp(email, purpose) {
   const code = generateOtp();
   const codeHash = hashOtp(code);
@@ -47172,104 +47194,124 @@ async function consumeOtp(email, code, purpose) {
   return true;
 }
 async function prefillRegistration(req, res) {
-  const emailParam = (req.query.email ?? "").trim().toLowerCase();
   const regNumberParam = (req.query.regNumber ?? "").trim().toUpperCase();
-  let lookupEmail = emailParam;
-  if (regNumberParam && REG_NUMBER_REGEX.test(regNumberParam)) {
-    const derived = suggestEmailFromRegNumber(regNumberParam);
-    if (derived) lookupEmail = derived;
-  }
-  if (!lookupEmail) {
-    res.status(400).json({ message: "email or regNumber query parameter is required" });
+  if (!regNumberParam) {
+    res.status(400).json({ message: "regNumber query parameter is required" });
     return;
   }
-  const rows = await db.select().from(usersTable).where(eq(usersTable.email, lookupEmail)).limit(1);
-  const user = rows[0];
-  if (!user) {
-    const suggestedEmail = regNumberParam ? suggestEmailFromRegNumber(regNumberParam) : null;
-    res.json({ exists: false, feeCleared: true, suggestedEmail });
+  if (!REG_NUMBER_REGEX.test(regNumberParam)) {
+    res.status(400).json({ message: "Invalid registration number format" });
     return;
   }
-  const feeCleared = user.feeStatus === "cleared";
+  const studentRows = await db.select().from(studentRecordsTable).where(eq(studentRecordsTable.registrationNumber, regNumberParam)).limit(1);
+  const student = studentRows[0];
+  if (!student) {
+    res.json({
+      notInDatabase: true,
+      exists: false,
+      feeCleared: false,
+      suggestedEmail: suggestEmailFromRegNumber(regNumberParam)
+    });
+    return;
+  }
+  const feeBalance = parseFloat(student.feeBalance ?? "0");
+  const feeCleared = feeBalance === 0;
+  const userRows = await db.select({ id: usersTable.id, status: usersTable.status }).from(usersTable).where(eq(usersTable.email, student.email)).limit(1);
+  const alreadyActive = userRows[0]?.status === "active";
   res.json({
+    notInDatabase: false,
     exists: true,
     feeCleared,
-    feeStatus: user.feeStatus ?? "pending",
-    name: user.name,
-    gender: user.gender,
-    courseId: user.courseId,
-    hostelId: user.hostelId,
-    alreadyActive: user.status === "active",
-    suggestedEmail: lookupEmail,
-    registrationNumber: user.registrationNumber
+    feeBalance,
+    name: student.name,
+    gender: student.gender,
+    schoolId: student.schoolId,
+    departmentId: student.departmentId,
+    courseId: student.courseId,
+    hostelId: student.hostelId ?? null,
+    yearOfStudy: student.yearOfStudy,
+    phoneNumber: student.phoneNumber ?? null,
+    suggestedEmail: student.email,
+    registrationNumber: student.registrationNumber,
+    alreadyActive
   });
 }
 async function register(req, res) {
-  const { name, email, password, gender, courseId, hostelId, registrationNumber } = req.body ?? {};
-  if (!name || !email || !password || !gender || !courseId) {
-    res.status(400).json({ message: "Name, email, password, gender and course are required" });
+  const { password, registrationNumber, hostelId } = req.body ?? {};
+  if (!registrationNumber) {
+    res.status(400).json({ message: "Registration number is required to register" });
     return;
   }
-  if (!EMAIL_REGEX.test(email)) {
-    res.status(400).json({ message: "Email must be in the form 12345.1234@students.ku.ac.ke" });
-    return;
-  }
-  if (registrationNumber && !REG_NUMBER_REGEX.test(registrationNumber)) {
+  const regNo = registrationNumber.trim().toUpperCase();
+  if (!REG_NUMBER_REGEX.test(regNo)) {
     res.status(400).json({ message: "Registration number must be in the format J31/4338/2022 or J31S/4338/2022" });
     return;
   }
-  if (password.length < 8) {
-    res.status(400).json({ message: "Password must be at least 8 characters" });
+  if (!password) {
+    res.status(400).json({ message: "Password is required" });
     return;
   }
-  if (!["male", "female"].includes(gender)) {
-    res.status(400).json({ message: "Gender must be male or female" });
+  const pwError = validatePasswordStrength(password);
+  if (pwError) {
+    res.status(400).json({ message: pwError, code: "WEAK_PASSWORD" });
     return;
   }
-  const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-  if (existing[0] && existing[0].status === "active") {
-    res.status(409).json({ message: "An account with that email already exists" });
-    return;
-  }
-  if (existing[0] && existing[0].feeStatus !== "cleared") {
+  const studentRows = await db.select().from(studentRecordsTable).where(eq(studentRecordsTable.registrationNumber, regNo)).limit(1);
+  const student = studentRows[0];
+  if (!student) {
     res.status(403).json({
-      message: "Your fee balance is not cleared. Please visit the Finance Office before registering.",
+      message: "Your registration number is not in the KU student database. Please contact the Registrar's Office.",
+      code: "NOT_IN_DATABASE"
+    });
+    return;
+  }
+  const feeBalance = parseFloat(student.feeBalance ?? "0");
+  if (feeBalance > 0) {
+    res.status(403).json({
+      message: `Your fee balance of KES ${feeBalance.toLocaleString()} is not cleared. Please visit the Finance Office before registering.`,
       code: "FEE_NOT_CLEARED"
     });
     return;
   }
-  const emailMatch = email.match(/^(\d{1,6})\.{1,2}(\d{4})@/);
-  const derivedRegNo = registrationNumber ?? (emailMatch ? null : null);
-  const finalRegNo = registrationNumber ?? (emailMatch ? null : null);
+  const email = student.email;
+  const existingRows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  const existing = existingRows[0];
+  if (existing?.status === "active") {
+    res.status(409).json({ message: "An account with this registration number already exists. Please sign in." });
+    return;
+  }
   const expiresAt = addMonths(/* @__PURE__ */ new Date(), REGISTRATION_VALID_MONTHS);
-  if (existing[0]) {
+  const chosenHostel = hostelId || student.hostelId || null;
+  if (existing) {
     await db.update(usersTable).set({
-      name,
+      name: student.name,
       passwordHash: hashPassword(password),
-      gender,
-      courseId,
-      hostelId: hostelId ?? null,
-      registrationNumber: finalRegNo ?? existing[0].registrationNumber,
-      registrationExpiresAt: expiresAt
-    }).where(eq(usersTable.id, existing[0].id));
+      gender: student.gender,
+      courseId: student.courseId,
+      hostelId: chosenHostel,
+      registrationNumber: regNo,
+      registrationExpiresAt: expiresAt,
+      feeStatus: "cleared"
+    }).where(eq(usersTable.id, existing.id));
   } else {
     await db.insert(usersTable).values({
-      name,
+      name: student.name,
       email,
       passwordHash: hashPassword(password),
       role: "student",
       status: "pending_otp",
-      gender,
-      courseId,
-      hostelId: hostelId ?? null,
-      registrationNumber: finalRegNo ?? null,
-      registrationExpiresAt: expiresAt
+      gender: student.gender,
+      courseId: student.courseId,
+      hostelId: chosenHostel,
+      registrationNumber: regNo,
+      registrationExpiresAt: expiresAt,
+      feeStatus: "cleared"
     });
   }
   const otp = await issueOtp(email, "registration");
   await audit({ action: "user.register", actorEmail: email, actorRole: "student", target: email });
   res.status(201).json({
-    message: "Verification code sent to your email",
+    message: "Verification code sent to your university email",
     email,
     devOtp: otp.devOtp
   });
@@ -47313,10 +47355,11 @@ async function login(req, res) {
     res.status(400).json({ message: "identifier and password are required" });
     return;
   }
-  let lookupEmail = identifier;
+  let lookupEmail = identifier.trim().toLowerCase();
   if (!identifier.includes("@")) {
-    if (REG_NUMBER_REGEX.test(identifier.toUpperCase())) {
-      const derived = suggestEmailFromRegNumber(identifier.toUpperCase());
+    const upper = identifier.trim().toUpperCase();
+    if (REG_NUMBER_REGEX.test(upper)) {
+      const derived = suggestEmailFromRegNumber(upper);
       if (derived) lookupEmail = derived;
     }
   }
@@ -47338,12 +47381,26 @@ async function login(req, res) {
     return;
   }
   if (user.status === "disabled") {
-    res.status(403).json({ message: "Your account has been disabled" });
+    res.status(403).json({ message: "Your account has been disabled. Contact the Electoral Commission." });
     return;
   }
   if (user.registrationExpiresAt && user.registrationExpiresAt < /* @__PURE__ */ new Date()) {
     res.status(403).json({ message: "Your registration has expired. Please re-register." });
     return;
+  }
+  if (user.registrationNumber) {
+    const studentRows = await db.select({ feeBalance: studentRecordsTable.feeBalance }).from(studentRecordsTable).where(eq(studentRecordsTable.registrationNumber, user.registrationNumber)).limit(1);
+    const student = studentRows[0];
+    if (student) {
+      const feeBalance = parseFloat(student.feeBalance ?? "0");
+      if (feeBalance > 0) {
+        res.status(403).json({
+          message: `Access denied. Your fee balance of KES ${feeBalance.toLocaleString()} is not cleared. Please visit the Finance Office.`,
+          code: "FEE_NOT_CLEARED"
+        });
+        return;
+      }
+    }
   }
   const token = signToken({ sub: user.id, email: user.email, role: user.role });
   const profile = await loadUserProfile(user.id);
@@ -47392,8 +47449,9 @@ async function resetPassword(req, res) {
     res.status(400).json({ message: "email, otp and newPassword are required" });
     return;
   }
-  if (newPassword.length < 8) {
-    res.status(400).json({ message: "Password must be at least 8 characters" });
+  const pwError = validatePasswordStrength(newPassword);
+  if (pwError) {
+    res.status(400).json({ message: pwError, code: "WEAK_PASSWORD" });
     return;
   }
   const ok = await consumeOtp(email, code, "password_reset");
@@ -47409,7 +47467,7 @@ async function getMe(req, res) {
   const profile = await loadUserProfile(req.user.id);
   res.json({ user: profile });
 }
-var REG_NUMBER_REGEX, EMAIL_REGEX, OTP_TTL_MS, REGISTRATION_VALID_MONTHS;
+var REG_NUMBER_REGEX, OTP_TTL_MS, REGISTRATION_VALID_MONTHS;
 var init_auth_controller = __esm({
   "src/controllers/auth.controller.ts"() {
     "use strict";
@@ -47419,7 +47477,6 @@ var init_auth_controller = __esm({
     init_email();
     init_audit();
     REG_NUMBER_REGEX = /^[A-Z]{1,2}\d+\/\d+\/\d{4}$/;
-    EMAIL_REGEX = /^\d{1,6}\.{1,2}\d{4}@students\.ku\.ac\.ke$/;
     OTP_TTL_MS = 10 * 60 * 1e3;
     REGISTRATION_VALID_MONTHS = 11;
   }
