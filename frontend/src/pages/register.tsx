@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   useListHostels,
@@ -70,7 +69,6 @@ export default function RegisterPage() {
   const [regNumberError, setRegNumberError] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [hostelId, setHostelId] = useState<string>("");
   const [otpCode, setOtpCode] = useState("");
   const [devOtpHint, setDevOtpHint] = useState<string | null>(null);
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null);
@@ -86,10 +84,13 @@ export default function RegisterPage() {
   const [, navigate] = useLocation();
 
   const hostels = (hostelsQ.data ?? []) as Array<any>;
-  const hostelOptions = useMemo(
-    () => (prefillData?.gender ? hostels.filter((h) => h.gender === prefillData.gender) : hostels),
-    [hostels, prefillData?.gender],
-  );
+  // Look up the hostel name from the DB-assigned hostelId (null = off-campus)
+  const hostelDisplayName = useMemo(() => {
+    if (!prefillData?.exists) return null;
+    if (!prefillData.hostelId) return "Off-campus (non-residential)";
+    const found = hostels.find((h: any) => h.id === prefillData.hostelId);
+    return found ? `${found.name}${found.zone ? ` — ${found.zone} zone` : ""}` : prefillData.hostelId;
+  }, [hostels, prefillData?.exists, prefillData?.hostelId]);
 
   const pwStrength = useMemo(() => checkPasswordStrength(password), [password]);
 
@@ -102,7 +103,6 @@ export default function RegisterPage() {
       const res = await fetch(`/api/auth/prefill?regNumber=${encodeURIComponent(regNo)}`);
       const data: PrefillData = await res.json();
       setPrefillData(data);
-      if (data.exists && data.hostelId) setHostelId(data.hostelId);
     } catch {
       setPrefillData(null);
     } finally {
@@ -115,7 +115,6 @@ export default function RegisterPage() {
     setRegNumber(upper);
     setRegNumberError("");
     setPrefillData(null);
-    setHostelId("");
 
     if (!upper) return;
 
@@ -149,7 +148,7 @@ export default function RegisterPage() {
         data: {
           registrationNumber: regNumber,
           password,
-          hostelId: hostelId || undefined,
+          hostelId: prefillData?.hostelId || undefined,
         } as any,
       })) as any;
       setDevOtpHint(r?.devOtp ?? null);
@@ -340,30 +339,29 @@ export default function RegisterPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* ── Hostel Selection (only if eligible and hostel not pre-assigned) ── */}
+                  {/* ── Hostel (auto-filled from DB, read-only) ── */}
                   <AnimatePresence>
-                    {prefillData?.exists && prefillData.feeCleared && !prefillData.alreadyActive && (
+                    {prefillData?.exists && prefillData.feeCleared && !prefillData.alreadyActive && hostelDisplayName && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         className="space-y-2 overflow-hidden"
                       >
-                        <Label className="flex items-center gap-1.5">
+                        <Label className="flex items-center gap-1.5 text-muted-foreground text-xs font-semibold uppercase tracking-wider">
                           <Building2 className="h-3.5 w-3.5" />
-                          Hostel (optional)
+                          Accommodation
                         </Label>
-                        <Select value={hostelId} onValueChange={setHostelId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={prefillData.hostelId ? "Pre-assigned (can change)" : "Select if you live in a hostel"} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Off-campus / No hostel</SelectItem>
-                            {hostelOptions.map((h: any) => (
-                              <SelectItem key={h.id} value={h.id}>{h.name} — {h.zone} zone</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-sm">
+                          <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <span className="flex-1 font-medium">{hostelDisplayName}</span>
+                          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">From DB</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {prefillData.hostelId
+                            ? "Your hostel is assigned in the university housing database and cannot be changed here."
+                            : "You are not registered in any KU hostel. You will be recorded as an off-campus (non-residential) student."}
+                        </p>
                       </motion.div>
                     )}
                   </AnimatePresence>

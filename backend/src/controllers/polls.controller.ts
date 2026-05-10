@@ -60,6 +60,10 @@ async function eligibleSeatsForUser(pollId: string, userId: string) {
     if (s.scope === "school" && s.scopeRefId && user.schoolId !== s.scopeRefId) return false;
     if (s.scope === "department" && s.scopeRefId && user.departmentId !== s.scopeRefId) return false;
     if (s.scope === "hostel" && s.scopeRefId && user.hostelId !== s.scopeRefId) return false;
+    // Non-residential: only off-campus students (no hostel assigned) may vote
+    if (s.scope === "non-residential" && user.hostelId !== null) return false;
+    // Residential: only students assigned to any hostel may vote
+    if (s.scope === "residential" && user.hostelId === null) return false;
     return true;
   });
 }
