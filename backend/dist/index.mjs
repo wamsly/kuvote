@@ -47659,6 +47659,8 @@ async function eligibleSeatsForUser(pollId, userId) {
     if (s.scope === "school" && s.scopeRefId && user.schoolId !== s.scopeRefId) return false;
     if (s.scope === "department" && s.scopeRefId && user.departmentId !== s.scopeRefId) return false;
     if (s.scope === "hostel" && s.scopeRefId && user.hostelId !== s.scopeRefId) return false;
+    if (s.scope === "non-residential" && user.hostelId !== null) return false;
+    if (s.scope === "residential" && user.hostelId === null) return false;
     return true;
   });
 }
